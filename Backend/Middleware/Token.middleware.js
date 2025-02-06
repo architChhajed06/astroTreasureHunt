@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import User from "../Model/User.js";
 
-const generateRefreshToken = (userDetails) => {
+const generateRefreshToken = (userId) => {
   const refreshToken = jwt.sign(
-    { userDetails },
-    process.env.JWT_REFRESH_SECRET, // Changed from JWT_SECRET
+    { userId: userId },
+    process.env.JWT_REFRESH_SECRET,
     {
       expiresIn: "7d",
     }
@@ -12,10 +12,10 @@ const generateRefreshToken = (userDetails) => {
   return refreshToken;
 };
 
-const generateAccessToken = (userDetails) => {
+const generateAccessToken = (userId) => {
   const accessToken = jwt.sign(
-    { userDetails },
-    process.env.JWT_ACCESS_SECRET, // Changed from JWT_SECRET
+    { userId: userId },
+    process.env.JWT_ACCESS_SECRET,
     {
       expiresIn: "1h",
     }
@@ -33,10 +33,10 @@ const auth = async (req, res, next) => {
     }
     try {
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-      console.log("Decoded JWT: ",decoded);
-      req.user = decoded;
+      console.log("Decoded JWT: ", decoded);
+      req.user = await User.findById(decoded.userId);
 
-      const newAccessToken = generateAccessToken(req.user.userId);
+      const newAccessToken = generateAccessToken(req.user._id);
 
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
@@ -52,8 +52,8 @@ const auth = async (req, res, next) => {
   } else {
     try {
       const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-      req.user = decoded;
-      console.log("Decoded JWT: ",decoded);
+      req.user = await User.findById(decoded.userId);
+      console.log("Decoded JWT: ", decoded);
       next();
     } catch (error) {
       return res.status(401).json({ message: "Invalid access token" });

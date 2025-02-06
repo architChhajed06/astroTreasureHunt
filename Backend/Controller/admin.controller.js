@@ -49,7 +49,7 @@ const addQuestion = async (req, res) => {
     const { levelNum, title, description, hints, correctCode } = req.body;
     console.log(req.body);
     console.log(req.user);
-    console.log("CREATED BY: ", req.user.userDetails._id);
+    console.log("CREATED BY: ", req.user._id);
 
     let newHints = []; //to store the hints in the correct format
     hints.map((hint) => {
@@ -109,7 +109,7 @@ const addQuestion = async (req, res) => {
       hints: newHints,
       correctCode,
       image: Object.keys(imageData).length > 0 ? imageData : undefined,
-      createdBy: req.user.userDetails._id, // Assuming you have user info from auth middleware
+      createdBy: req.user._id, // Assuming you have user info from auth middleware
     });
 
     await newQuestion.save();
@@ -162,7 +162,7 @@ const modifyQuestion = async (req, res) => {
     // Format hints if provide
 
     // Handle image upload if new image is provided
-    if (isImageUpdated && req.file) {
+    if (isImageUpdated==='true' && req.file) {
       try {
         // Delete old image from cloudinary if exists
         if (question.image && question.image.public_id) {
@@ -192,7 +192,7 @@ const modifyQuestion = async (req, res) => {
     // Prepare update object with only provided fields
     const updateData = { title, description, hints, correctCode, levelNum };
 
-    if(isImageUpdated){
+    if(isImageUpdated === 'true'){
         console.log("UPDATED IMAGE");
         updateData.image = imageData;
     }

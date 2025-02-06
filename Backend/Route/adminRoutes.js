@@ -32,7 +32,7 @@ router.post(
   addQuestion
 );
 router.post("/addLevel", auth, addLevel);
-router.patch("/modifyQuestion/:questionId", auth, modifyQuestion);
+router.post("/modifyQuestion/:questionId", auth, modifyQuestion);
 
 
 export default router;
