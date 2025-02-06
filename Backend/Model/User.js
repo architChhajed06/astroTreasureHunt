@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -33,14 +33,11 @@ const userSchema = new mongoose.Schema(
       enum: ["player", "admin"],
       default: "player",
     },
-    isTeamLead: {
-      type: Boolean,
-      default: false,
-    },
     team: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Team",
     },
+    refreshToken: String,
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     otpForPasswordReset: String,
@@ -51,4 +48,5 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("user" , userSchema);
+const User = mongoose.model("User", userSchema);
+export default User;

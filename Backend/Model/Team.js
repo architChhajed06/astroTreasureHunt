@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const teamSchema = new mongoose.Schema({
     teamName: {
       type: String,
@@ -56,9 +58,20 @@ const teamSchema = new mongoose.Schema({
       type: String,
       enum: ['active', 'completed'],
       default: 'active'
+    },
+    //To determine weather the team is blocked or not
+    blocked: {
+      type: Boolean,
+      default: false
+    },
+    //To uniquely identify a team through a code and allow users to join an existing team
+    team_code: {
+      type: String,
+      default: '',
+      unique: true
     }
   }, {
     timestamps: true
   });
 
-  module.exports = mongoose.model('Team', teamSchema);
+export default mongoose.model('Team', teamSchema);
