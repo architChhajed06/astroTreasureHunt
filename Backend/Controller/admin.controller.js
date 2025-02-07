@@ -248,7 +248,7 @@ const deleteQuestion = async (req, res) => {
     } 
   }
   catch(error){
-    return res.status(500).json({message: "Error deleting image from cloudinary", error: error});
+    return res.status(500).json({message: "Error deleting image from cloudinary", error: error.message});
   }
 
     //delete question from level
@@ -310,7 +310,6 @@ const deleteLevel = async (req, res) => {
     return res.status(500).json({message: "Failed to delete level", error: error.message});
   }
 };
-
 
 
 export { addLevel, addQuestion, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel };

@@ -13,23 +13,14 @@ const teamSchema = new mongoose.Schema({
       required: true
     },
     members: [{
-      name: {
-        type: String,
-        required: true
-      },
-      email: {
-        type: String,
-        required: true
-      },
-      rollNo: {
-        type: String,
-        required: true
-      }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
     }],
     currentLevel: {
-      type: Number,
-      default: 1
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Level'
     },
+
     score: {
       type: Number,
       default: 0
@@ -38,21 +29,19 @@ const teamSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Question'
     },
-    levelStartTime: {
-      type: Date
-    },
-    hintsUnlocked: [{
-      hintNumber: Number,
-      unlockedAt: Date
-    }],
+    levelStartedAt: Date,
     completedQuestions: [{
       questionId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Question'
       },
+      level: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Level'
+      },
+      startedAt: Date,
       completedAt: Date,
-      timeTaken: Number,
-      hintsUsed: [Number]
+      timeTaken: Number
     }],
     status: {
       type: String,
@@ -69,6 +58,10 @@ const teamSchema = new mongoose.Schema({
       type: String,
       default: '',
       unique: true
+    },
+    hasCompletedAllLevels: {
+      type: Boolean,
+      default: false
     }
   }, {
     timestamps: true

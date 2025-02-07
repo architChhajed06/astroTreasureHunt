@@ -61,4 +61,20 @@ const auth = async (req, res, next) => {
   }
 };
 
-export { auth, generateAccessToken, generateRefreshToken };
+
+const protectedAdminRoutes = async (req, res, next) => {
+  try{
+
+    const user = req.user;
+    if(user.role !== "admin"){
+      return res.status(401).json({message: "This is a protected route. Only admins are authorized"})
+    }
+    next();
+  }
+  catch(error){
+    return res.status(500).json({message: "Error in protectedAdminRoutes", error: error.message,
+      completeError: error})
+  }
+}
+
+export { auth, generateAccessToken, generateRefreshToken, protectedAdminRoutes };
