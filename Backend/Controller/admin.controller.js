@@ -231,4 +231,86 @@ const modifyQuestion = async (req, res) => {
   }
 };
 
-export { addLevel, addQuestion, modifyQuestion };
+//delete question
+const deleteQuestion = async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const question = await Question.findById(questionId);
+    console.log("Question Found: ", question)
+    if(!question){
+      return res.status(404).json({message: "Question not found"});
+    }
+
+    //delete image from cloudinary if exists
+    try{
+    if(question.image && question.image.public_id){
+      await cloudinary.uploader.destroy(question.image.public_id);
+    } 
+  }
+  catch(error){
+    return res.status(500).json({message: "Error deleting image from cloudinary", error: error});
+  }
+
+    //delete question from level
+    const level = await Level.findById(question.level);
+    level.questions = level.questions.filter(
+      (id) => id.toString() !== questionId
+    );
+    await level.save();
+
+    await Question.findByIdAndDelete(questionId);
+
+    return res.status(200).json({message: "Question deleted successfully"});
+  } catch (error) {
+    return res.status(500).json({message: "Failed to delete question", error: error.message});
+  }
+};
+
+
+//get all levels
+const getAllLevels = async (req, res) => {
+  try {
+    const levels = await Level.find();
+    return res.status(200).json({levels});
+  } catch (error) {
+    return res.status(500).json({message: "Failed to get all levels", error: error.message});
+  }
+};
+
+
+//get all questions within a level
+const getAllQuestionsByLevel = async (req, res) => {
+  try {
+    const { levelId } = req.params;
+    const questions = await Question.find({level: levelId});
+    return res.status(200).json({questions});
+  } catch (error) {
+    return res.status(500).json({message: "Failed to get all questions", error: error.message});
+  }
+};
+
+//delete a level
+const deleteLevel = async (req, res) => {
+  try {
+    const  { levelId }  = req.params;
+    const level = await Level.findById(levelId);
+    if(!level){
+      return res.status(404).json({message: "Level not found"});
+    }
+
+    //delete all questions within the level
+    await Question.deleteMany({level: levelId});
+
+    //delete the level
+    await Level.findByIdAndDelete(levelId);
+
+    return res.status(200).json({message: "Level deleted successfully"});
+    
+  } catch (error) {
+    return res.status(500).json({message: "Failed to delete level", error: error.message});
+  }
+};
+
+
+
+export { addLevel, addQuestion, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel };

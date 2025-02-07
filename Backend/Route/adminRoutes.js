@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { auth } from "../Middleware/Token.middleware.js";
-import { addQuestion, addLevel, modifyQuestion } from "../Controller/admin.controller.js";
+import { addQuestion, addLevel, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel } from "../Controller/admin.controller.js";
 import { upload } from "../config/multer.js";
 
 const router = express.Router();
@@ -33,6 +33,11 @@ router.post(
 );
 router.post("/addLevel", auth, addLevel);
 router.post("/modifyQuestion/:questionId", auth, modifyQuestion);
+router.delete("/deleteQuestion/:questionId", auth, deleteQuestion);
+router.get("/getAllLevels", auth, getAllLevels);
+router.get("/getAllQuestionsByLevel/:levelId", auth, getAllQuestionsByLevel);
+router.delete("/deleteLevel/:levelId", auth, deleteLevel);
+
 
 
 export default router;
