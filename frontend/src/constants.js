@@ -1,1 +1,27 @@
-console.log("Hello World");
+const PORT = 4000;
+const BASE_URL = `http://localhost:${PORT}/api`;
+
+
+//Question
+export const ADD_QUESTION = `${BASE_URL}/admin/addQuestion`;
+export const ADD_LEVEL = `${BASE_URL}/admin/addLevel`;
+
+
+
+export const MODIFY_QUESTION = (questionId) => `${BASE_URL}/admin/modifyQuestion/${questionId}`;
+export const DELETE_QUESTION = (questionId) => `${BASE_URL}/admin/deleteQuestion/${questionId}`;
+export const GET_ALL_LEVELS = `${BASE_URL}/admin/getAllLevels`;
+
+export const GET_ALL_QUESTIONS_BY_LEVEL = (levelId) => `${BASE_URL}/admin/getAllQuestionsByLevel/${levelId}`;
+export const DELETE_LEVEL = (levelId) =>`${BASE_URL}/admin/deleteLevel/${levelId}`;
+
+
+//Admin Start Game and Reset Game endpoints
+export const START_GAME = `${BASE_URL}/admin/startGame`;
+export const RESET_GAME = `${BASE_URL}/admin/resetGame`;
+
+
+//General User endpoints
+export const REGISTER = `${BASE_URL}/user/register`;
+export const LOGIN = `${BASE_URL}/user/login`;
+export const LOGOUT = `${BASE_URL}/user/logout`;

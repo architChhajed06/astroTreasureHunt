@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import SpaceBackground from "./space-background";
 import { useState } from "react";
+import { ADD_QUESTION } from "../constants";
 export default function AddQuestion() {
   // levelNum, title, description, hints, correctCode, image
   const { levelId } = useParams();
@@ -29,7 +30,7 @@ export default function AddQuestion() {
         console.log(`${key}: ${value}`);
       }
 
-      const response = await fetch("http://localhost:3000/api/questions", {
+      const response = await fetch(ADD_QUESTION, {
         method: "POST",
         body: formData,
       });

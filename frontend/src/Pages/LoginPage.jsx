@@ -7,10 +7,7 @@ import { Label } from "../components/ui/label";
 import { Card } from "../components/ui/card";
 import { Rocket, User, Lock } from "lucide-react";
 import { Link } from "react-router-dom"; // for navigation
-
-// Admin credentials
-const ADMIN_EMAIL = "admin@spacequest.com";
-const ADMIN_PASSWORD = "admin123";
+import { LOGIN } from "../constants";
 
 const SpaceBackground = React.lazy(() => import("../components/space-background"));
 
@@ -26,20 +23,35 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    // Check if the credentials match the admin credentials
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      // Simulate a delay for the login process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Redirect to the admin dashboard
-      navigate('/admin');
-    } else {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        // Redirect to the game page after successful login
-        navigate('/game');
-      } catch (err) {
-        setError("Invalid email or password. Please try again.");
+    try {
+      const response = await fetch(`${LOGIN}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
       }
+
+      // Store the token in localStorage
+      localStorage.setItem('token', data.token);
+      
+      // Check user role from backend response and redirect accordingly
+      if (data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/game');
+      }
+    } catch (err) {
+      setError(err.message || "Invalid email or password. Please try again.");
     }
     setIsLoading(false);
   };
