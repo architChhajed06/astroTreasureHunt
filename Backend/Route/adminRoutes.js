@@ -9,7 +9,7 @@ const router = express.Router();
 // Use upload.single('image') middleware for image upload
 router.post(
   "/addQuestion",
-  auth,
+  auth, protectedAdminRoutes,
   (req, res, next) => {
     upload(req, res, function (err) {
       if (err instanceof multer.MulterError) {

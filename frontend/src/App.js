@@ -16,10 +16,11 @@ function App() {
         <Route path="/signup" element={<SignUpPage/>}/>
         <Route path="/game" element={<GamePage/>}/>
         <Route path="/admin" element={<AdminPage/>}/>
-        <Route path="/admin/addQuestion/:levelId" element={<AddQuestion/>}/>
-        <Route path="/level/:levelId/questions" element={<LevelQuestions/>}/>
-        <Route path="/modifyQuestion/:id/:questionId" element={<ModifyQuestion/>}/>
+        <Route path="/admin/addQuestion/:levelNum" element={<AddQuestion/>}/>
+        <Route path="/level/:levelNum/questions/:mongoLevelId" element={<LevelQuestions/>}/>
+        <Route path="/modifyQuestion/:levelNum/:mongoLevelId" element={<ModifyQuestion/>}/>
       </Routes>
+
     </Router>
   );
 }

@@ -1,24 +1,28 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import SpaceBackground from "../components/space-background";
+import { MODIFY_QUESTION } from "../constants";
+import axios from "axios";
 
 const ModifyQuestion = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { levelNum, mongoLevelId } = useParams();
 
   // Get question data from navigation state
   const questionData = location.state?.questionData;
   console.log("Question Data:", questionData); // Debug log
 
   const [hints, setHints] = useState("");
-  const [hintsList, setHintsList] = useState(questionData?.hints || []);
+  const [hintsList, setHintsList] = useState(
+    questionData?.hints?.map(hint => typeof hint === 'object' ? hint.text : hint) || []
+  );
   const [image, setImage] = useState(null);
   const [isImageUpdated, setIsImageUpdated] = useState(false);
 
   // Initialize state with existing question data
   const [formData, setFormData] = useState({
-    levelNum: id || "",
+    levelNum: levelNum || "",
     title: questionData?.title || "",
     description: questionData?.description || "",
     correctCode: questionData?.correctCode || "",
@@ -49,33 +53,48 @@ const ModifyQuestion = () => {
       formDataToSend.append("correctCode", formData.correctCode);
       formDataToSend.append("hints", JSON.stringify(hintsList));
       formDataToSend.append("isImageUpdated", isImageUpdated);
-      
+
       if (isImageUpdated && image) {
         formDataToSend.append("image", image);
       }
-     
-       // Log FormData entries
-       console.log("Form Data To Send:");
-       for (let pair of formDataToSend.entries()) {
-           console.log(pair[0] + ': ' + pair[1]);
-       }
-      const response = await fetch(
-        `http://localhost:3000/api/questions/${questionData.id}`,
+
+      // Log FormData entries
+      console.log("Form Data To Send:");
+      for (let pair of formDataToSend.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      const response = await axios.post(
+        MODIFY_QUESTION(questionData.id),
+        formDataToSend,
         {
-          method: "PUT",
-          body: formDataToSend,
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to modify question");
-      }
-
+      console.log("Response:", response.data);
       alert("Question modified successfully!");
-      navigate(`/level/${id}/questions`);
+
+      // Use state parameter to force a refresh
+      navigate(`/level/${levelNum}/questions/${mongoLevelId}`, {
+        replace: true,
+        state: { refresh: true }
+      });
+
     } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to modify question");
+      console.error("Error:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Failed to modify question");
+    }
+  };
+
+  const handleAddHint = (e) => {
+    if (e.key === "Enter" && hints.trim()) {
+      e.preventDefault();
+      setHintsList([...hintsList, hints.trim()]);
+      setHints("");
     }
   };
 
@@ -91,7 +110,7 @@ const ModifyQuestion = () => {
         >
           <div className="flex justify-between items-center mb-6">
             <Link
-              to={`/level/${id}/questions`}
+              to={`/level/${levelNum}/questions`}
               className="text-white hover:text-gray-300"
             >
               ← Back to Questions
@@ -109,7 +128,7 @@ const ModifyQuestion = () => {
                 value={formData.levelNum}
                 disabled
                 className="w-full px-3 sm:px-4 py-2 bg-white/20 border border-gray-300/30 rounded-lg text-red-500 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-               
+
               />
             </div>
 
@@ -145,9 +164,9 @@ const ModifyQuestion = () => {
                 {questionData?.image && !isImageUpdated && (
                   <div className="mb-2">
                     <p className="text-white text-sm mb-1">Current Image:</p>
-                    <img 
-                      src={`http://localhost:3000/${questionData.image}`} 
-                      alt="Current" 
+                    <img
+                      src={`http://localhost:3000/${questionData.image}`}
+                      alt="Current"
                       className="w-40 h-40 object-cover rounded-lg"
                     />
                   </div>
@@ -167,9 +186,9 @@ const ModifyQuestion = () => {
                 {image && (
                   <div className="mt-2">
                     <p className="text-white text-sm mb-1">New Image Preview:</p>
-                    <img 
-                      src={URL.createObjectURL(image)} 
-                      alt="Preview" 
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt="Preview"
                       className="w-40 h-40 object-cover rounded-lg"
                     />
                   </div>
@@ -187,13 +206,7 @@ const ModifyQuestion = () => {
                   placeholder="Enter hint and press Enter"
                   value={hints}
                   onChange={(e) => setHints(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && hints.trim()) {
-                      e.preventDefault();
-                      setHintsList([...hintsList, hints.trim()]);
-                      setHints("");
-                    }
-                  }}
+                  onKeyDown={handleAddHint}
                   className="w-full px-3 sm:px-4 py-2 bg-white/20 border border-gray-300/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
                 {/* Display added hints */}
@@ -204,7 +217,7 @@ const ModifyQuestion = () => {
                       className="flex items-center bg-blue-600/50 px-3 py-1 rounded-lg"
                     >
                       <span className="text-white text-sm">
-                        hint{index + 1}: {hint}
+                        hint{index + 1}: {typeof hint === 'object' ? hint.text : hint}
                       </span>
                       <button
                         type="button"

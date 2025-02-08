@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {  useNavigate } from "react-router-dom"; // for navigation
+import { useNavigate } from "react-router-dom"; // for navigation
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -8,6 +8,7 @@ import { Card } from "../components/ui/card";
 import { Rocket, User, Lock } from "lucide-react";
 import { Link } from "react-router-dom"; // for navigation
 import { LOGIN } from "../constants";
+import axios from "axios";
 
 const SpaceBackground = React.lazy(() => import("../components/space-background"));
 
@@ -24,26 +25,41 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await fetch(`${LOGIN}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // const response = await fetch(`${LOGIN}`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   credentials: 'include',
+      //   body: JSON.stringify({
+      //     email,
+      //     password,
+      //   }),
+      // });
+
+      // const data = await response.json();
+
+      const response = await axios.post(LOGIN, 
+        {
           email,
           password,
-        }),
-      });
-
-      const data = await response.json();
-
+        },
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      const data = response.data;
+      
+      console.log("DATA: ", data);
+      console.log("COOKIES: ", document.cookie);
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store the token in localStorage
-      localStorage.setItem('token', data.token);
-      
       // Check user role from backend response and redirect accordingly
       if (data.user.role === 'admin') {
         navigate('/admin');

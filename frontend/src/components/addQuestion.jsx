@@ -3,10 +3,11 @@ import { useParams } from "react-router-dom";
 import SpaceBackground from "./space-background";
 import { useState } from "react";
 import { ADD_QUESTION } from "../constants";
+import axios from "axios";
 export default function AddQuestion() {
   // levelNum, title, description, hints, correctCode, image
-  const { levelId } = useParams();
-  console.log("levelId", levelId);
+  const { levelNum } = useParams();
+  console.log("levelNum", levelNum);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -18,37 +19,37 @@ export default function AddQuestion() {
     e.preventDefault();
     try {
       const formData = new FormData();
-      formData.append("level", levelId);
+      formData.append("levelNum", levelNum);
       formData.append("title", title);
       formData.append("description", description);
       formData.append("hints", JSON.stringify(hintsList));
       formData.append("correctCode", correctCode);
-      formData.append("image", image);
+      formData.append("questionImage", image);
 
       console.log("Form Data Contents:");
       for (let [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
       }
 
-      const response = await fetch(ADD_QUESTION, {
-        method: "POST",
-        body: formData,
+      const response = await axios.post(ADD_QUESTION, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to add question");
-      }
+      console.log("RESPONSE", response.data);
 
       // clear form after successful submission
-
       setTitle("");
       setDescription("");
       setHints("");
+      setHintsList([]);
       setCorrectCode("");
       setImage(null);
       alert("Question added successfully");
     } catch (error) {
-      console.error("Error adding question:", error);
+      console.error("Error adding question:", error.response?.data || error.message);
       alert("Failed to add question. Please try again.");
     }
   };
@@ -68,15 +69,15 @@ export default function AddQuestion() {
           <div className="space-y-4">
             {/* Level Number Input */}
             <div className="flex flex-col">
-            <label className="text-white text-sm mb-1">Level:</label>
-            <input
+              <label className="text-white text-sm mb-1">Level:</label>
+              <input
                 type="number"
-                value={levelId}
+                value={levelNum}
                 disabled
                 className="w-full px-3 sm:px-4 py-2 bg-white/20 border border-gray-300/30 rounded-lg text-red-500
                     placeholder-gray-400 focus:outline-none cursor-not-allowed opacity-70"
-            />
-        </div>
+              />
+            </div>
 
             {/* Title Input */}
             <div className="flex flex-col">

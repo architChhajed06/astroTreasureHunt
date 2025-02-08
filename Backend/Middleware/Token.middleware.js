@@ -66,7 +66,9 @@ const protectedAdminRoutes = async (req, res, next) => {
   try{
 
     const user = req.user;
+    console.log("USER IS ", req.user.role)
     if(user.role !== "admin"){
+      console.log(req.user.email, "IS NOT AN ADMIN", req.user.role);
       return res.status(401).json({message: "This is a protected route. Only admins are authorized"})
     }
     next();

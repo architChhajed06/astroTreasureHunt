@@ -1,24 +1,6 @@
 import Level from "../Model/Level.js";
 import Question from "../Model/Question.js";
 import cloudinary from "../config/cloudinary.js";
-
-//protected routes
-const protectedRoutes = async (req, res, next) => {
-  try {
-    const userRole = req.user.role;
-    if (userRole !== "admin") {
-      return res
-        .status(401)
-        .json({ message: "You are not authorized to access this route" });
-    }
-    next();
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
-  }
-};
-
 // add level
 const addLevel = async (req, res) => {
   try {
@@ -43,10 +25,12 @@ const addLevel = async (req, res) => {
 // add question
 const addQuestion = async (req, res) => {
   // Declare imageData at the top level of the function
+  console.log("ADD QUESTION REQUEST RECIVED FROM: ", req.user.email)
   let imageData = {};
 
   try {
-    const { levelNum, title, description, hints, correctCode } = req.body;
+    const { levelNum, title, description, correctCode } = req.body;
+    const hints = JSON.parse(req.body.hints);
     console.log(req.body);
     console.log(req.user);
     console.log("CREATED BY: ", req.user._id);
@@ -157,6 +141,7 @@ const modifyQuestion = async (req, res) => {
     } = req.body;
     console.log("QUESTION ID: ", questionId);
     console.log("MODIFIED QUESTION BODY: ", req.body);
+    console.log("ENTIRE REQUEST: ", req);
   
 
     // Format hints if provide
@@ -234,11 +219,13 @@ const modifyQuestion = async (req, res) => {
 //delete question
 const deleteQuestion = async (req, res) => {
   try {
+    console.log("DELETING QUESTION REQUEST RECIEVED FROM: ", req.user.email);
     const { questionId } = req.params;
+    console.log("DELETING QUESTION WITH ID: ", questionId);
     const question = await Question.findById(questionId);
     console.log("Question Found: ", question)
     if(!question){
-      return res.status(404).json({message: "Question not found"});
+      return res.status(404).json({message: "Question not found", success: false});
     }
 
     //delete image from cloudinary if exists
@@ -248,7 +235,7 @@ const deleteQuestion = async (req, res) => {
     } 
   }
   catch(error){
-    return res.status(500).json({message: "Error deleting image from cloudinary", error: error.message});
+    return res.status(500).json({message: "Error deleting image from cloudinary", error: error.message, success: false});
   }
 
     //delete question from level
@@ -260,9 +247,9 @@ const deleteQuestion = async (req, res) => {
 
     await Question.findByIdAndDelete(questionId);
 
-    return res.status(200).json({message: "Question deleted successfully"});
+    return res.status(200).json({message: "Question deleted successfully", success: true});
   } catch (error) {
-    return res.status(500).json({message: "Failed to delete question", error: error.message});
+    return res.status(500).json({message: "Failed to delete question", error: error.message, success: false});
   }
 };
 
@@ -281,8 +268,11 @@ const getAllLevels = async (req, res) => {
 //get all questions within a level
 const getAllQuestionsByLevel = async (req, res) => {
   try {
+    console.log("GETTING ALL QUESTIONS BY LEVE level ID: ", req.params);
     const { levelId } = req.params;
+    console.log("LEVEL ID: ", levelId);
     const questions = await Question.find({level: levelId});
+    console.log("QUESTIONS: ", questions);
     return res.status(200).json({questions});
   } catch (error) {
     return res.status(500).json({message: "Failed to get all questions", error: error.message});

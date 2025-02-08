@@ -78,18 +78,20 @@ const login = async (req, res) => {
     console.log("SETTING ACCESS TOKEN IN COOKIE");
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 1000, // 15 minutes
+      secure: true, // Always set to true for security
+      sameSite: "none", // Allow cross-origin cookies
+      maxAge: 60 * 60 * 1000, // 1 hour
+      path: "/", // Accessible everywhere
     });
 
     //Set refresh token in cookie
     console.log("SETTING REFRESH TOKEN IN COOKIE");
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true, // Always set to true for security
+      sameSite: "none", // Allow cross-origin cookies
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/", // Accessible everywhere
     });
 
     //Update user with refresh token
@@ -97,7 +99,6 @@ const login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
     console.log("USER UPDATED WITH REFRESH TOKEN");
-
 
     // Return user info (excluding sensitive data)
     console.log("RETURNING USER INFO");
@@ -171,7 +172,9 @@ const verifyOTP = async (req, res) => {
 
 const showTempDataStorage = async (req, res) => {
   console.log("Temp user data storage:", tempUserStore);
-  return res.status(200).json({ message: "Temp user data storage", tempUserStore });
+  return res
+    .status(200)
+    .json({ message: "Temp user data storage", tempUserStore });
 };
 
 // Step 1: Initiate registration and send OTP
@@ -181,8 +184,10 @@ const initiateRegister = async (req, res) => {
     const { name, email, rollNo, phoneNo, password } = req.body;
 
     //check if email belongs to domain id
-    if(!isValidDomainID(email)){
-      return res.status(400).json({message: "Domain ID must belong to NIT KKR."});
+    if (!isValidDomainID(email)) {
+      return res
+        .status(400)
+        .json({ message: "Domain ID must belong to NIT KKR." });
     }
 
     // Check if user already exists
@@ -329,6 +334,6 @@ export {
   logout,
   initiateRegister,
   verifyAndRegister,
-  showTempDataStorage
+  showTempDataStorage,
   // ... other exports
 };
