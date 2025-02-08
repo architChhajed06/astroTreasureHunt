@@ -4,7 +4,9 @@ import LoginPage from "./Pages/LoginPage";
 import SignUpPage from "./Pages/SignupPage"
 import GamePage from "./Pages/GamePage"
 import AdminPage from "./Pages/AdminPage"
-import AddQuestion from "./Pages/AddQuestionPage";
+import AddQuestion from "./components/addQuestion";
+import LevelQuestions from "./Pages/LevelQuestions";
+import ModifyQuestion from "./components/modifyQuestion";
 function App() {
   return (
     <Router>
@@ -14,7 +16,9 @@ function App() {
         <Route path="/signup" element={<SignUpPage/>}/>
         <Route path="/game" element={<GamePage/>}/>
         <Route path="/admin" element={<AdminPage/>}/>
-        <Route path="/admin/add-question" element={<AddQuestion/>}/>
+        <Route path="/admin/addQuestion/:levelId" element={<AddQuestion/>}/>
+        <Route path="/level/:levelId/questions" element={<LevelQuestions/>}/>
+        <Route path="/modifyQuestion/:id/:questionId" element={<ModifyQuestion/>}/>
       </Routes>
     </Router>
   );
