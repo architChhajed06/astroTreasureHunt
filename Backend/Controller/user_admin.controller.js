@@ -180,6 +180,11 @@ const initiateRegister = async (req, res) => {
   try {
     const { name, email, rollNo, phoneNo, password } = req.body;
 
+    //check if email belongs to domain id
+    if(!isValidDomainID(email)){
+      return res.status(400).json({message: "Domain ID must belong to NIT KKR."});
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -213,11 +218,11 @@ const initiateRegister = async (req, res) => {
     });
 
     // Send OTP via SMS
-    const message = `Your OTP for registration is: ${newOTP}. Valid for 10 minutes.`;
-    await sendSMS(phoneNo, message);
+    const message = `Your OTP for registration is: ${newOTP}. Valid for 10 minutes.`; //will send this message to email
+    await sendEmail(email, message);
 
     return res.status(200).json({
-      message: "OTP sent successfully to your phone number",
+      message: "OTP sent successfully to your domain ID", //replace this with email
       tempOTP: newOTP, // Remove this in production, only for testing
     });
   } catch (error) {

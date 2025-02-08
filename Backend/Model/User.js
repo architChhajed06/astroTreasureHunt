@@ -30,12 +30,13 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["player", "admin"],
+      enum: ["team_leader", "player", "admin"],
       default: "player",
     },
     team: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Team",
+      default: null
     },
     refreshToken: String,
     resetPasswordToken: String,

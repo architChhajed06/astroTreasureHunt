@@ -1,9 +1,9 @@
 import express from "express";
 import multer from "multer";
-import { auth } from "../Middleware/Token.middleware.js";
+import { auth, protectedAdminRoutes } from "../Middleware/Token.middleware.js";
 import { addQuestion, addLevel, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel } from "../Controller/admin.controller.js";
 import { upload } from "../config/multer.js";
-
+import { startGame, resetGame } from "../Controller/Game.controller.js";
 const router = express.Router();
 
 // Use upload.single('image') middleware for image upload
@@ -31,12 +31,15 @@ router.post(
   },
   addQuestion
 );
-router.post("/addLevel", auth, addLevel);
-router.post("/modifyQuestion/:questionId", auth, modifyQuestion);
-router.delete("/deleteQuestion/:questionId", auth, deleteQuestion);
-router.get("/getAllLevels", auth, getAllLevels);
-router.get("/getAllQuestionsByLevel/:levelId", auth, getAllQuestionsByLevel);
-router.delete("/deleteLevel/:levelId", auth, deleteLevel);
+router.post("/addLevel", auth,protectedAdminRoutes, addLevel);
+router.post("/modifyQuestion/:questionId", auth, protectedAdminRoutes, modifyQuestion);
+router.delete("/deleteQuestion/:questionId", auth, protectedAdminRoutes, deleteQuestion);
+router.get("/getAllLevels", auth, protectedAdminRoutes, getAllLevels);
+router.get("/getAllQuestionsByLevel/:levelId", auth, protectedAdminRoutes, getAllQuestionsByLevel);
+router.delete("/deleteLevel/:levelId", auth, protectedAdminRoutes, deleteLevel);
+
+router.post("/startGame", auth, protectedAdminRoutes, startGame);
+router.post("/resetGame", auth, protectedAdminRoutes, resetGame);
 
 
 
