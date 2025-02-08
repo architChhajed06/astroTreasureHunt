@@ -7,6 +7,7 @@ import AdminPage from "./Pages/AdminPage"
 import AddQuestion from "./components/addQuestion";
 import LevelQuestions from "./Pages/LevelQuestions";
 import ModifyQuestion from "./components/modifyQuestion";
+import OTPVerificationPage from "./Pages/OTPVerificationPage";
 function App() {
   return (
     <Router>
@@ -19,6 +20,7 @@ function App() {
         <Route path="/admin/addQuestion/:levelNum" element={<AddQuestion/>}/>
         <Route path="/level/:levelNum/questions/:mongoLevelId" element={<LevelQuestions/>}/>
         <Route path="/modifyQuestion/:levelNum/:mongoLevelId" element={<ModifyQuestion/>}/>
+        <Route path="/verify-otp" element={<OTPVerificationPage/>}/>
       </Routes>
 
     </Router>

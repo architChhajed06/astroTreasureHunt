@@ -7,8 +7,10 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card } from "../components/ui/card";
-import { Rocket, User, Lock, Mail } from "lucide-react";
+import { Rocket, User, Lock, Mail, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { REGISTER } from "../constants";
 
 // Dynamically import SpaceBackground using React.lazy
 const SpaceBackground = React.lazy(() => import("../components/space-background"));
@@ -20,12 +22,31 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [rollNumber, setRollNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
+
+  // Email validation function
+  const validateEmail = (email) => {
+    const nitkkrDomain = /@nitkkr\.ac\.in$/;
+    if (!nitkkrDomain.test(email)) {
+      setEmailError("Please use your NIT KKR email (@nitkkr.ac.in)");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
+
+    if (!validateEmail(email)) {
+      setIsLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -34,11 +55,32 @@ export default function SignupPage() {
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Redirect to the game page after successful signup
-      navigate("/game");
+      const userData = {
+        name: username,
+        email,
+        password,
+        rollNo: rollNumber,
+        phoneNo:phoneNumber
+      };
+
+      const response = await axios.post(
+        REGISTER,
+        userData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.data.success) {
+        navigate("/game");
+      } else {
+        setError(response.data.message || "Signup failed");
+      }
     } catch (err) {
-      setError("An error occurred during signup. Please try again.");
+      setError(err.response?.data?.message || "An error occurred during signup. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +117,41 @@ export default function SignupPage() {
                 </div>
               </div>
               <div className="space-y-2">
+                <Label htmlFor="rollNumber" className="text-white">
+                  Roll Number
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="rollNumber"
+                    type="number"
+                    placeholder="12345678"
+                    value={rollNumber}
+                    onChange={(e) => setRollNumber(e.target.value)}
+                    className="bg-white/10 border-white/20 text-white pl-10"
+                    required
+                  />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber" className="text-white">
+                  Phone Number
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    pattern="[0-9]{10}"
+                    placeholder="1234567890"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="bg-white/10 border-white/20 text-white pl-10"
+                    required
+                  />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+                </div>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="email" className="text-white">
                   Email
                 </Label>
@@ -82,7 +159,7 @@ export default function SignupPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="commander@spacequest.com"
+                    placeholder="commander@nitkkr.ac.in"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="bg-white/10 border-white/20 text-white pl-10"
@@ -90,6 +167,7 @@ export default function SignupPage() {
                   />
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
                 </div>
+                {emailError && <p className="text-yellow-500 text-sm">{emailError}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-white">

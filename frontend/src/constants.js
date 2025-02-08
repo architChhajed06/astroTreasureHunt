@@ -22,6 +22,7 @@ export const RESET_GAME = `${BASE_URL}/admin/resetGame`;
 
 
 //General User endpoints
-export const REGISTER = `${BASE_URL}/user/register`;
+export const REGISTER = `${BASE_URL}/user/register/initiate`;
 export const LOGIN = `${BASE_URL}/user/login`;
 export const LOGOUT = `${BASE_URL}/user/logout`;
+export const VERIFY_OTP = `${BASE_URL}/user/register/verify`;
