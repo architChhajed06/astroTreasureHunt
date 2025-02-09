@@ -257,6 +257,7 @@ const deleteQuestion = async (req, res) => {
 //get all levels
 const getAllLevels = async (req, res) => {
   try {
+    console.log("GETTTING ALL LEVELS");
     const levels = await Level.find();
     return res.status(200).json({levels});
   } catch (error) {

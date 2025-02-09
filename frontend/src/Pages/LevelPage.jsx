@@ -1,15 +1,17 @@
 // show all levels to admin and user will click the level and then questions of that level will be shown
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import SpaceBackground from '../components/space-background';
 import axios from 'axios';
 import { GET_ALL_LEVELS, } from '../constants';
+import { useNavigate } from 'react-router-dom';
 
 export default function Levels() {
     const [levels, setLevels] = useState([
 
 
     ]);
+    const navigate = useNavigate();
    
     useEffect(() => {
         fetchLevels();
@@ -27,6 +29,9 @@ export default function Levels() {
 
                 }
             });
+            if(response.status===401){
+                navigate("/login");
+            }
             console.log("LEVELS: ", response.data);
 
             response.data.levels.forEach(level => {

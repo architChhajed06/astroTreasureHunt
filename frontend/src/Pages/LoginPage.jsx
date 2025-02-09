@@ -7,8 +7,7 @@ import { Label } from "../components/ui/label";
 import { Card } from "../components/ui/card";
 import { Rocket, User, Lock } from "lucide-react";
 import { Link } from "react-router-dom"; // for navigation
-import { LOGIN } from "../constants";
-import axios from "axios";
+import { useAuth } from '../context/AuthContext';
 
 const SpaceBackground = React.lazy(() => import("../components/space-background"));
 
@@ -18,6 +17,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,51 +25,18 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // const response = await fetch(`${LOGIN}`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   credentials: 'include',
-      //   body: JSON.stringify({
-      //     email,
-      //     password,
-      //   }),
-      // });
-
-      // const data = await response.json();
-
-      const response = await axios.post(LOGIN, 
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-  
-      const data = response.data;
+      const data = await login(email, password);
       
-      console.log("DATA: ", data);
-      console.log("COOKIES: ", document.cookie);
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      // Check user role from backend response and redirect accordingly
       if (data.user.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/game');
       }
     } catch (err) {
-      setError(err.message || "Invalid email or password. Please try again.");
+      setError(err.response?.data?.message || "Invalid email or password. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (

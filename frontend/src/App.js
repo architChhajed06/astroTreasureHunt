@@ -8,21 +8,46 @@ import AddQuestion from "./components/addQuestion";
 import LevelQuestions from "./Pages/LevelQuestions";
 import ModifyQuestion from "./components/modifyQuestion";
 import OTPVerificationPage from "./Pages/OTPVerificationPage";
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
+
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage/>}/>
-        <Route path="/game" element={<GamePage/>}/>
-        <Route path="/admin" element={<AdminPage/>}/>
-        <Route path="/admin/addQuestion/:levelNum" element={<AddQuestion/>}/>
-        <Route path="/level/:levelNum/questions/:mongoLevelId" element={<LevelQuestions/>}/>
-        <Route path="/modifyQuestion/:levelNum/:mongoLevelId" element={<ModifyQuestion/>}/>
-        <Route path="/verify-otp" element={<OTPVerificationPage/>}/>
-      </Routes>
-
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            } 
+          />
+          <Route path="/signup" element={<SignUpPage/>}/>
+          <Route 
+            path="/game" 
+            element={
+              <ProtectedRoute>
+                <GamePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/admin/addQuestion/:levelNum" element={<AddQuestion/>}/>
+          <Route path="/level/:levelNum/questions/:mongoLevelId" element={<LevelQuestions/>}/>
+          <Route path="/modifyQuestion/:levelNum/:mongoLevelId" element={<ModifyQuestion/>}/>
+          <Route path="/verify-otp" element={<OTPVerificationPage/>}/>
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

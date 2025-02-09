@@ -36,5 +36,14 @@ router.get("/profile", auth, async (req, res) => {
   // Access user info from req.user
   // Handle profile logic
 });
+router.get("/verify", auth, async (req, res) => {
 
+  const sentUser = {
+    _id: req.user._id,
+    email: req.user.email,
+    role: req.user.role,
+    team: req.user.team
+  }
+  res.status(200).json({success: true, user: sentUser });
+})
 export default router;

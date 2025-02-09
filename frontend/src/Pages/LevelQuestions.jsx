@@ -42,6 +42,14 @@ export default function LevelQuestions() {
                     'Content-Type': 'application/json'
                 }
             });
+
+            if(response.status === 401){
+                navigate("/login");
+            }
+
+            // console.log(response);
+            // console.log(response.status)
+            // console.log(response.statusText)
     
             if (!response.ok) {
                 throw new Error('Failed to fetch questions');
@@ -63,6 +71,7 @@ export default function LevelQuestions() {
                 console.log("Questions fetched:", formattedQuestions);
             }
         } catch (error) {
+          
             console.error('Error fetching questions:', error);
         }
     };
