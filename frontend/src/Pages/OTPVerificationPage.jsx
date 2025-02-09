@@ -32,8 +32,10 @@ export default function OTPVerificationPage() {
                     withCredentials: true
                 }
             );
-
+            console.log("Response from verifyAndRegister", response.data);
+            alert("OTP verified");
             if (response.data.success) {
+                alert("Navigating to game");
                 navigate("/game");
             } else {
                 setError(response.data.message || "OTP verification failed");

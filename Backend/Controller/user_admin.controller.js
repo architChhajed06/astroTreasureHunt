@@ -6,6 +6,7 @@ import {
 import bcrypt from "bcrypt";
 import twilio from "twilio";
 import crypto from "crypto";
+import {sendEmail} from "../utils/emailService.js";
 
 const expiresPlayerString = "100h";
 const expiresAdminString = "1000h";
@@ -29,27 +30,27 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Initialize Twilio client using environment variables
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+// // Initialize Twilio client using environment variables
+// const twilioClient = twilio(
+//   process.env.TWILIO_ACCOUNT_SID,
+//   process.env.TWILIO_AUTH_TOKEN
+// );
 
-// Add this function to send SMS
-const sendSMS = async (phoneNumber, message) => {
-  try {
-    const response = await twilioClient.messages.create({
-      body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: `+91${phoneNumber}`, // Adding India country code
-    });
-    console.log("SMS sent successfully:", response.sid);
-    return true;
-  } catch (error) {
-    console.error("Error sending SMS:", error);
-    throw new Error("Failed to send SMS");
-  }
-};
+// // Add this function to send SMS
+// const sendSMS = async (phoneNumber, message) => {
+//   try {
+//     const response = await twilioClient.messages.create({
+//       body: message,
+//       from: process.env.TWILIO_PHONE_NUMBER,
+//       to: `+91${phoneNumber}`, // Adding India country code
+//     });
+//     console.log("SMS sent successfully:", response.sid);
+//     return true;
+//   } catch (error) {
+//     console.error("Error sending SMS:", error);
+//     throw new Error("Failed to send SMS");
+//   }
+// };
 
 const login = async (req, res) => {
   try {
@@ -137,31 +138,6 @@ const logout = async (req, res) => {
   }
 };
 
-const register = async (req, res) => {
-  const { name, email, rollNo, phoneNo, password } = req.body;
-  const user = await User.findOne({ email });
-  if (user) {
-    return res.status(400).json({ message: "User already exists" });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  //Send an OTP to the user's phone number using Trello
-  //Await User's confirmation of the OTP
-  //If OTP is confirmed, create a new user
-
-  const newUser = new User({
-    name,
-    email,
-    rollNo,
-    phoneNo,
-    password: hashedPassword,
-  });
-  await newUser.save();
-
-  return res.status(201).json({ message: "User created successfully" });
-};
-
 const verifyOTP = async (req, res) => {
   const { phoneNumber, otp } = req.body;
   const user = await User.findOne({ email });
@@ -184,11 +160,11 @@ const initiateRegister = async (req, res) => {
     const { name, email, rollNo, phoneNo, password } = req.body;
 
     //check if email belongs to domain id
-    if (!isValidDomainID(email)) {
-      return res
-        .status(400)
-        .json({ message: "Domain ID must belong to NIT KKR." });
-    }
+    // if (!isValidDomainID(email)) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Domain ID must belong to NIT KKR." });
+    // }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -226,14 +202,24 @@ const initiateRegister = async (req, res) => {
     const message = `Your OTP for registration is: ${newOTP}. Valid for 10 minutes.`; //will send this message to email
     await sendEmail(email, message);
 
+    //Delete the temp user data and clear the registration token from the cookie after 10 minutes (if the user doesn't send the OTP)
+    setTimeout(() => {
+      tempUserStore.delete(registrationToken);
+      res.clearCookie("registrationToken");
+    }, 10 * 60 * 1000);
+
+
     return res.status(200).json({
       message: "OTP sent successfully to your domain ID", //replace this with email
-      tempOTP: newOTP, // Remove this in production, only for testing
+      tempOTP: newOTP, // Remove this in production, only for testing,
+      otpSent: true
     });
+
   } catch (error) {
+    console.log("Error in initiateRegister", error);
     return res.status(500).json({
       message: "Failed to initiate registration",
-      error: error.message,
+      error: error,
     });
   }
 };
@@ -320,8 +306,10 @@ const verifyAndRegister = async (req, res) => {
 
     return res.status(201).json({
       message: "User registered successfully",
+      success: true,
     });
   } catch (error) {
+    console.log("Error in verifyAndRegister", error);
     return res.status(500).json({
       message: "Error creating user",
       error: error.message,

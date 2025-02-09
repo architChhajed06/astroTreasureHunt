@@ -12,20 +12,26 @@ export const AuthProvider = ({ children }) => {
 
   // Check auth status on mount
   useEffect(() => {
+    console.log("Checking auth status");
     checkAuth();
   }, []);
 
   const checkAuth = async () => {
     try {
+      console.log("ACCESS TOKEN", document.cookie.accessToken);
+      console.log("REFRESH TOKEN", document.cookie.refreshToken);
       const response = await axios.get(VERIFY_USER, {
         withCredentials: true
       });
+
+      console.log("Response from checkAuth", response.data);
       setUser(response.data.user);
     } catch (error) {
       setUser(null);
     } finally {
       setLoading(false);
     }
+
   };
 
   const login = async (email, password) => {

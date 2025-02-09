@@ -74,11 +74,16 @@ export default function SignupPage() {
         }
       );
 
+      if(response.data.otpSent){
+        navigate("/verify-otp");
+      }
+
       if (response.data.success) {
         navigate("/game");
       } else {
         setError(response.data.message || "Signup failed");
       }
+
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred during signup. Please try again.");
     } finally {

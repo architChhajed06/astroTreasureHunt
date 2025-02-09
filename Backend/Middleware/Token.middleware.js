@@ -24,17 +24,26 @@ const generateAccessToken = (userId) => {
 };
 
 const auth = async (req, res, next) => {
+  console.log("AUTH MIDDLEWARE CALLED");
   const accessToken = req.cookies.accessToken;
   const refreshToken = req.cookies.refreshToken;
+  console.log("ACCESS TOKEN: ", accessToken);
+  console.log("REFRESH TOKEN: ", refreshToken);
+
 
   if (!accessToken) {
+    console.log("NO ACCESS TOKEN FOUND");
     if (!refreshToken) {
+      console.log("NO REFRESH TOKEN FOUND");
       return res.status(401).json({ message: "Unauthorized" });
     }
+
     try {
+      console.log("DECODING TOKEN: ");
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-      console.log("Decoded JWT: ", decoded);
+      console.log("Decoded JWT: 1 ", decoded);
       req.user = await User.findById(decoded.userId);
+      console.log("Found user:  ", req.user);
 
       const newAccessToken = generateAccessToken(req.user._id);
 
@@ -52,8 +61,10 @@ const auth = async (req, res, next) => {
   } else {
     try {
       const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+      console.log("decoded object: ", decoded);
       req.user = await User.findById(decoded.userId);
-      console.log("Decoded JWT: ", decoded);
+      console.log("FOUND USER: ", req.user);
+      console.log("Decoded JWT: 3", decoded);
       next();
     } catch (error) {
       return res.status(401).json({ message: "Invalid access token" });

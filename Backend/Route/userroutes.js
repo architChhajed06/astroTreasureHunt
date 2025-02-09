@@ -37,7 +37,8 @@ router.get("/profile", auth, async (req, res) => {
   // Handle profile logic
 });
 router.get("/verify", auth, async (req, res) => {
-
+  console.log("Verifying user");
+  console.log(req.user);
   const sentUser = {
     _id: req.user._id,
     email: req.user.email,
