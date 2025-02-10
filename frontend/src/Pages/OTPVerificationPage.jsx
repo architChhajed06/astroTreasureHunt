@@ -7,7 +7,7 @@ import { Label } from "../components/ui/label";
 import { Card } from "../components/ui/card";
 import { KeyRound } from "lucide-react";
 import { VERIFY_OTP } from "../constants";
-
+import { useAuth } from '../context/AuthContext'; 
 const SpaceBackground = React.lazy(() => import("../components/space-background"));
 
 export default function OTPVerificationPage() {
@@ -15,6 +15,7 @@ export default function OTPVerificationPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { setUser } = useAuth(); // Get setUser from auth context
 
     const handleVerify = async (e) => {
         e.preventDefault();
@@ -35,8 +36,17 @@ export default function OTPVerificationPage() {
             console.log("Response from verifyAndRegister", response.data);
             alert("OTP verified");
             if (response.data.success) {
-                alert("Navigating to game");
-                navigate("/game");
+               
+               // Update the auth context with user data
+               setUser(response.data.user);
+              
+               // Navigate to the appropriate route
+               if (response.data.user.role === 'admin') {
+                   navigate('/admin');
+               } else {
+                    
+                   navigate('/game');
+               }
             } else {
                 setError(response.data.message || "OTP verification failed");
             }

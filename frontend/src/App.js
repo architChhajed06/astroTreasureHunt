@@ -29,12 +29,13 @@ function App() {
           <Route 
             path="/game" 
             element={
-              <ProtectedRoute>
+             <ProtectedRoute>
                 <GamePage />
-              </ProtectedRoute>
+             </ProtectedRoute>
             } 
           />
           <Route 
+
             path="/admin" 
             element={
               <ProtectedRoute>
