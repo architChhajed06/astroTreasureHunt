@@ -44,6 +44,7 @@ export default function TeamSelectionModal({ isOpen, onClose }) {
                 if (createResponse.data.success) {
                     setUser({
                         ...user,
+                        role: "team_leader",
                         team:createResponse.data.team._id
                     });
                     console.log("----------------Data in createeRespons---------------",createResponse );

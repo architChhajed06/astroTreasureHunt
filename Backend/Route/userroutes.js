@@ -46,6 +46,15 @@ router.get("/verify", auth, async (req, res) => {
     role: req.user.role,
     team: req.user.team
   }
+  if(req.newAccessToken){
+
+    res.cookie("accessToken", req.newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+  }
   res.status(200).json({success: true, user: sentUser });
 })
 export default router;

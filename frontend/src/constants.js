@@ -32,3 +32,9 @@ export const LOGIN = `${BASE_URL}/user/login`;
 export const LOGOUT = `${BASE_URL}/user/logout`;
 export const VERIFY_USER = `${BASE_URL}/user/verify`;
 export const VERIFY_OTP = `${BASE_URL}/user/register/verify`;
+
+
+//Player Endpoints
+export const FETCH_CURRENT_QUESTION = `${BASE_URL}/player/getCurrentQuestion`
+export const GET_GAME_DETAILS = `${BASE_URL}/player/fetchGameDetails`;
+export const SUBMIT_CODE = `${BASE_URL}/player/submitQuestionCode`

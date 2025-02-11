@@ -45,14 +45,11 @@ const auth = async (req, res, next) => {
       req.user = await User.findById(decoded.userId);
       console.log("Found user:  ", req.user);
 
+      console.log("GENERATING NEW ACCESS TOKEN: ");
       const newAccessToken = generateAccessToken(req.user._id);
+      req.newAccessToken = newAccessToken;
+      console.log("NEW ACCESS TOKEN: ", newAccessToken);
 
-      res.cookie("accessToken", newAccessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 60 * 60 * 1000, // 1 hour
-      });
 
       next();
     } catch (error) {

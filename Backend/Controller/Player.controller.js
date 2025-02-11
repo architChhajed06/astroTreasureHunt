@@ -1,6 +1,8 @@
 import Team from "../Model/Team.js";
 import User from "../Model/User.js"
 import  { updateTeamScore } from './Game.controller.js'
+import GameDetails from "../Model/GameDetails.js";
+import Question from "../Model/Question.js";
 
 const maxNumberOfTeamMembers = 3;
 
@@ -23,9 +25,9 @@ const createTeam = async (req, res) => {
             teamName,
             teamLead: req.user._id,
             members: [req.user._id],
-            currLevel: null,
+            currentLevel: null,
             score: 0,
-            currentQuestion: null,
+            currentQkxuestion: null,
             completedQuestions: [],
             status: "active",
             blocked: false,
@@ -113,19 +115,28 @@ const getCurrentQuestion = async (req, res) => {
             return res.status(400).json({message: "You are not in any team"});
         }
 
-        if(team.currLevel == null){
+        if(team.hasCompletedAllLevels){
+            return res.status(400).json({message: "Your team has already completed all levels", success: false});
+        }
+
+        if(team.currentLevel == null){
             return res.status(400).json({message: "Your team has not been alloted a question. The game might not have been started yet by the admin."})
         }
 
-        const currQuestion = await Question.findById(team.currentQuestion).select("-correctCode -createdBy");
+        const currQuestion = await Question.findById(team.currentQuestion).select("-correctCode -createdBy").populate("level");
+
+
+        //filitering the hints
+        currQuestion.hints = currQuestion.hints.filter(hint => hint.flag === true);
+
         if(!currQuestion){
             return res.status(400).json({message: "The question you requested for does not exist"});
         }
 
-        return res.status(200).json({message: "Current question", currQuestion: currQuestion});
+        return res.status(200).json({message: "Current question", currQuestion: currQuestion, success: true});
     }
     catch(error){
-        return res.status(500).json({message: "Failed to get current question", error: error.message});
+        return res.status(500).json({message: "Failed to get current question", error: error.message, success: false});
     }
 }
 
@@ -134,8 +145,11 @@ const submitQuestionCode = async (req, res) => {
         const { questionCode, questionId } = req.body;
         const user = req.user;
 
+        console.log("RECEIVED QUESTION CODE: ", questionCode);
+        console.log("RECEIVED QUESTION ID: ", questionId);
+
         if(user.role !== "team_leader"){
-            return res.status(400).json({message: "Only Team Leaders can submit the questino code"});
+            return res.status(400).json({message: "Only Team Leaders can submit the question code"});
         }
 
         const question = await Question.findById(questionId);
@@ -143,18 +157,18 @@ const submitQuestionCode = async (req, res) => {
             return res.status(400).json({message: "Question not found"});
         }
 
-        if(question.answer !== questionCode){
+        if(question.correctCode !== questionCode){
             return res.status(400).json({message: "Incorrect question code"});
         }
 
         //The team leader has entered the correct code for the question
         //Updating the team's score
-        await updateTeamScore(team)
+        const message = await updateTeamScore(user.team);
 
-        return res.status(200).json({message: "Question submitted successfully"});
+        return res.status(200).json({message: message, success: true});
     }
     catch(error){
-        return res.status(500).json({message: "Failed to submit question code", error: error.message});
+        return res.status(500).json({message: "Failed to submit question code", error: error.message, success: false});
     }
 }
 
@@ -173,11 +187,27 @@ const getPlayerLeaderBoard = async (req, res) => {
     }
 }
 
+const fetchGameDetails = async (req, res) => {
+    try{
+        const gameDetails = await GameDetails({});
+        if(!gameDetails){
+            return res.status(404).json({ success: true, message: "Game Details not found"});
+        }
+        return res.status(200).json({success: true, message: "Game Details Fetched", gameDetails});
+    }
+    catch(error){
+        return res.status(500).json({success: false, error: error.message, message: 
+            "Unable to fetch game details"
+        })
+    }
+}
 
 
 
 
-export {createTeam, getTeamCodeToTeamLeader, joinTeam, getCurrentQuestion, submitQuestionCode, getPlayerLeaderBoard,getTeamDetails};
+
+
+export {createTeam, getTeamCodeToTeamLeader, joinTeam, getCurrentQuestion, submitQuestionCode, getPlayerLeaderBoard,getTeamDetails, fetchGameDetails};
 
 
 
