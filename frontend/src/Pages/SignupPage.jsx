@@ -27,6 +27,12 @@ export default function SignupPage() {
   const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
 
+  const handleRollNumberChange = (e) => {
+    const rollNo = e.target.value;
+    setRollNumber(rollNo);
+    setEmail(rollNo+"@nitkkr.ac.in");
+  };
+
   // Email validation function
   const validateEmail = (email) => {
     const nitkkrDomain = /@nitkkr\.ac\.in$/;
@@ -53,10 +59,11 @@ export default function SignupPage() {
       setIsLoading(false);
       return;
     }
-
+    
     try {
       const userData = {
         name: username,
+
         email,
         password,
         rollNo: rollNumber,
@@ -79,7 +86,7 @@ export default function SignupPage() {
       }
 
       if (response.data.success) {
-        navigate("/game");
+        navigate("/teamSelection");
       } else {
         setError(response.data.message || "Signup failed");
       }
@@ -131,7 +138,7 @@ export default function SignupPage() {
                     type="number"
                     placeholder="12345678"
                     value={rollNumber}
-                    onChange={(e) => setRollNumber(e.target.value)}
+                    onChange={handleRollNumberChange}
                     className="bg-white/10 border-white/20 text-white pl-10"
                     required
                   />
@@ -166,7 +173,8 @@ export default function SignupPage() {
                     type="email"
                     placeholder="commander@nitkkr.ac.in"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    disabled
+                    
                     className="bg-white/10 border-white/20 text-white pl-10"
                     required
                   />

@@ -6,11 +6,11 @@ import { Input } from '../components/ui/input'; // Adjust the path as needed
 import { Card } from '../components/ui/card'; // Adjust the path as needed
 import { Badge } from '../components/ui/badge'; // Adjust the path as needed
 import SpaceBackground from '../components/space-background'; // Adjust the path as needed
-
+import { useAuth } from '../context/AuthContext';
 export default function GamePage() {
   const [hints, setHints] = useState([false, false, false]);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
-
+  const { user } = useAuth();
   return (
     <>
       <SpaceBackground />
@@ -26,7 +26,7 @@ export default function GamePage() {
             {/* Player Info & Timer */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="text-xl font-bold text-white">Commander John</div>
+                <div className="text-xl font-bold text-white">{user.name}</div>
                 <Badge variant="outline" className="text-purple-400 border-purple-400">
                   Level 1
                 </Badge>

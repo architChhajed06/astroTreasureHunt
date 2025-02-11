@@ -21,6 +21,11 @@ export const START_GAME = `${BASE_URL}/admin/startGame`;
 export const RESET_GAME = `${BASE_URL}/admin/resetGame`;
 
 
+// Join team and create team
+export const JOIN_TEAM = `${BASE_URL}/player/joinTeam`;
+export const CREATE_TEAM = `${BASE_URL}/player/createTeam`;
+export const GET_TEAM_DETAILS = (teamId) => `${BASE_URL}/player/getTeamDetails/${teamId}`;
+
 //General User endpoints
 export const REGISTER = `${BASE_URL}/user/register/initiate`;
 export const LOGIN = `${BASE_URL}/user/login`;

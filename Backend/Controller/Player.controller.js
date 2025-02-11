@@ -15,7 +15,7 @@ const createTeam = async (req, res) => {
         const tempUser = await User.findById(req.user._id);
 
         if(tempUser.team != null){
-            return res.status(400).json({message: "You are already in a team"});
+            return res.status(400).json({message: "You are already in a team",success:false});
         }
         const teamCode = Math.random().toString(36).substring(2, 15);
 
@@ -35,10 +35,10 @@ const createTeam = async (req, res) => {
         const user = await User.findByIdAndUpdate(req.user._id, {role: "team_leader", team: team._id});
 
         
-        return res.status(200).json({message: "Team created successfully", team});
+        return res.status(200).json({message: "Team created successfully", team,success:true});
     }
     catch(error){
-        return res.status(500).json({message: "Failed to create team", error: error.message});
+        return res.status(500).json({message: "Failed to create team", error: error.message,success:false});
     }
 
 }
@@ -57,38 +57,50 @@ const getTeamCodeToTeamLeader = async (req, res) => {
         return res.status(500).json({message: "Failed to get team code to team leader", error: error.message});
     }
 }
+const getTeamDetails = async (req, res) => {
+    try{
+        const teamId = req.params.teamId;
+        const team = await Team.findById(teamId).populate("members");
+        return res.status(200).json({message: "Team details", team, success: true});
+    }
 
+    catch(error){
+        return res.status(500).json({message: "Failed to get team details", error: error.message, success: false});
+    }
+}
 const joinTeam = async (req, res) => {
     try{
         const {teamCode} = req.body;
 
+
         if(!teamCode){
-            return res.status(400).json({message: "Team code is required"});
+            return res.status(400).json({message: "Team code is required",success:false});
         }
 
         const team = await Team.findOne({team_code: teamCode});
         if(!team){
-            return res.status(400).json({message: "Invalid team code"});
+            return res.status(400).json({message: "Invalid team code",success:false});
         }
 
         if(team.members.length >= maxNumberOfTeamMembers){
-            return res.status(400).json({message: "Team is full"});
+            return res.status(400).json({message: "Team is full",success:false});
         }
 
         const user = await User.findById(req.user._id);
 
         if(user.team != null){
-            return res.status(400).json({message: "You are already in a team"});
+            return res.status(400).json({message: "You are already in a team",success:true});
         }
 
         await User.findByIdAndUpdate(req.user._id, {team: team._id});
         await Team.findByIdAndUpdate(team._id, {$push: {members: req.user._id}});
 
-        return res.status(200).json({message: "Joined team successfully"});
+        return res.status(200).json({message: "Joined team successfully",team,success:true});
     }
     catch(error){
-        return res.status(500).json({message: "Failed to join team", error: error.message});
+        return res.status(500).json({message: "Failed to join team", error: error.message,success:false});
     }
+
         
 }
 
@@ -165,7 +177,7 @@ const getPlayerLeaderBoard = async (req, res) => {
 
 
 
-export {createTeam, getTeamCodeToTeamLeader, joinTeam, getCurrentQuestion, submitQuestionCode, getPlayerLeaderBoard};
+export {createTeam, getTeamCodeToTeamLeader, joinTeam, getCurrentQuestion, submitQuestionCode, getPlayerLeaderBoard,getTeamDetails};
 
 
 

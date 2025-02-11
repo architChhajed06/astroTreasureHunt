@@ -41,6 +41,7 @@ router.get("/verify", auth, async (req, res) => {
   console.log(req.user);
   const sentUser = {
     _id: req.user._id,
+    name: req.user.name,
     email: req.user.email,
     role: req.user.role,
     team: req.user.team

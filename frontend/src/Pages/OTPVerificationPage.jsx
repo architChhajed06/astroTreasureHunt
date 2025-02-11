@@ -8,14 +8,15 @@ import { Card } from "../components/ui/card";
 import { KeyRound } from "lucide-react";
 import { VERIFY_OTP } from "../constants";
 import { useAuth } from '../context/AuthContext'; 
-const SpaceBackground = React.lazy(() => import("../components/space-background"));
 
+const SpaceBackground = React.lazy(() => import("../components/space-background"));
 export default function OTPVerificationPage() {
     const [otp, setOtp] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    const { setUser } = useAuth(); // Get setUser from auth context
+    
+    const { user,setUser } = useAuth(); // Get setUser from auth context
 
     const handleVerify = async (e) => {
         e.preventDefault();
@@ -36,14 +37,18 @@ export default function OTPVerificationPage() {
             console.log("Response from verifyAndRegister", response.data);
             alert("OTP verified");
             if (response.data.success) {
-               
+                // console.log('///////////////////',user);
                // Update the auth context with user data
                setUser(response.data.user);
+
               
                // Navigate to the appropriate route
                if (response.data.user.role === 'admin') {
                    navigate('/admin');
-               } else {
+               }else if(!response.data.user.team){
+                    navigate('/teamSelection');
+               } 
+               else {
                     
                    navigate('/game');
                }
@@ -57,8 +62,11 @@ export default function OTPVerificationPage() {
         }
     };
 
+  
+
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
+        <>
+         <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
             <React.Suspense fallback={<div>Loading...</div>}>
                 <SpaceBackground />
             </React.Suspense>
@@ -101,8 +109,11 @@ export default function OTPVerificationPage() {
                             {isLoading ? "Verifying..." : "Verify OTP"}
                         </Button>
                     </form>
+                    
                 </div>
             </Card>
         </div>
+        </>
+       
     );
 }

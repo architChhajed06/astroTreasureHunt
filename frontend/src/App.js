@@ -9,8 +9,9 @@ import LevelQuestions from "./Pages/LevelQuestions";
 import ModifyQuestion from "./components/modifyQuestion";
 import OTPVerificationPage from "./Pages/OTPVerificationPage";
 import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
-
+import { ProtectedRoute, PublicRoute,AdminProtectedRoute } from './components/ProtectedRoute';
+import TeamSelectionPage from "./Pages/TeamSelectionPage";
+import TeamDetailsPage from "./Pages/TeamDetailsPage";
 function App() {
   return (
     <Router>
@@ -38,15 +39,27 @@ function App() {
 
             path="/admin" 
             element={
-              <ProtectedRoute>
+              <AdminProtectedRoute>
                 <AdminPage />
-              </ProtectedRoute>
+              </AdminProtectedRoute>
             } 
+          />
+          <Route path="/teamSelection" element= {
+            <ProtectedRoute>
+              <TeamSelectionPage/>
+            </ProtectedRoute>
+          }/>
+          <Route path="/teamDetails" element={
+            <ProtectedRoute>
+                <TeamDetailsPage/>
+              </ProtectedRoute>
+          }
           />
           <Route path="/admin/addQuestion/:levelNum" element={<AddQuestion/>}/>
           <Route path="/level/:levelNum/questions/:mongoLevelId" element={<LevelQuestions/>}/>
           <Route path="/modifyQuestion/:levelNum/:mongoLevelId" element={<ModifyQuestion/>}/>
           <Route path="/verify-otp" element={<OTPVerificationPage/>}/>
+         
         </Routes>
       </AuthProvider>
     </Router>

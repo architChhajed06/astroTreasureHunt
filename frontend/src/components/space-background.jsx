@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
+const MAX_METEORS = 15; // Maximum number of meteors
+
 export default function SpaceBackground() {
   const [mounted, setMounted] = useState(false);
   const [meteors, setMeteors] = useState([]);
@@ -21,7 +23,19 @@ export default function SpaceBackground() {
     window.addEventListener("resize", handleResize);
 
     const interval = setInterval(() => {
-      setMeteors((prev) => [...prev, Date.now()]);
+      setMeteors((prev) => {
+        // Remove meteors older than 2 seconds
+        const currentTime = Date.now();
+        const filteredMeteors = prev.filter(
+          (timestamp) => currentTime - timestamp < 2000
+        );
+
+        // Only add new meteor if we're below the limit
+        if (filteredMeteors.length < MAX_METEORS) {
+          return [...filteredMeteors, currentTime];
+        }
+        return filteredMeteors;
+      });
     }, 2000);
 
     return () => {

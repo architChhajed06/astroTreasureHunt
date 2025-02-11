@@ -16,9 +16,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
   const navigate = useNavigate();
   const { login } = useAuth();
-
+ 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -26,11 +27,15 @@ export default function LoginPage() {
 
     try {
       const data = await login(email, password);
-      
+      console.log("----------------Data in login---------------",data.user );
       if (data.user.role === 'admin') {
         navigate('/admin');
-      } else {
-        navigate('/game');
+      }else if(!data.user.team){
+        console.log("No team");
+        navigate('/teamSelection');
+      }
+      else {
+        navigate('/teamDetails');
       }
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password. Please try again.");
@@ -106,7 +111,9 @@ export default function LoginPage() {
               </Link>
             </div>
           </Card>
+
         </motion.div>
+      
       </div>
     </>
   );

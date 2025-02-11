@@ -10,7 +10,7 @@ export default function NavBar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="text-xl font-bold text-white">
-            Space Quest
+            Antariksh
           </Link>
 
           <div className="flex items-center gap-4">
