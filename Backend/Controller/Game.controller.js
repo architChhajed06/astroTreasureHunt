@@ -55,6 +55,9 @@ const allotNewRandomQuestionFromLevel = async (levelId) => {
     try{
         const level = await Level.findById(levelId);
         const allQuestions = await Question.find({level: levelId});
+        const allTeams = await Team.find({currentLevel: levelId});
+
+        
         console.log("ALL QUESTIONS: ", allQuestions);
         const randomQuestion = allQuestions[Math.floor(Math.random() * allQuestions.length)];
         console.log("RANDOM QUESTION: ", randomQuestion);

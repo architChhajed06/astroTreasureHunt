@@ -1,6 +1,8 @@
 import Level from "../Model/Level.js";
 import Question from "../Model/Question.js";
 import cloudinary from "../config/cloudinary.js";
+import GameDetails from "../Model/GameDetails.js";
+import Team from "../Model/Team.js";
 // add level
 const addLevel = async (req, res) => {
   try {
@@ -320,27 +322,37 @@ const getQuestionWithHints = async (req, res) => {
 
 const fetchLevelTeamStatus = async (req, res) => {
   try{
-    const allTeams = await Team.find().populate("level currentQuestion").groupBy("level");
+
+    const gameDetails = await GameDetails.findOne({});
+    if(gameDetails.hasGameStarted === false){
+      return res.status(400).json({message: "Game has not started yet", success: false});
+    }
+
+    const allTeams = await Team.find().populate("currentLevel currentQuestion");
     const allLevels = await Level.find().populate("questions");
 
 
     const levelTeamStatus = allLevels.map( (level) => {
-      level.questions = level.questions.map( (question) => {
-        const allTeamsAllotedTheQuestion = allTeams.filter(team => team.currentQuestion.toString() === question._id.toString());
-        return {
-          questionId: question._id,
-          questionTitle: question.title,
-          allotedTo: allTeamsAllotedTheQuestion.map(team => team.teamName)
-        }
-      })
 
       return {
-        ...level,
-        questions: levelQuestions
+        levelId: level._id,
+        levelName: level.level,
+        questions: level.questions.map( (question) => {
+          const allTeamsAllotedTheQuestion = allTeams.filter(team => team.currentQuestion._id.toString() === question._id.toString());
+          console.log("ALL TEAMS ALLOTED THE QUESTION: ", allTeamsAllotedTheQuestion);
+          return {
+            questionId: question._id,
+            questionTitle: question.title,
+            allotedTo: allTeamsAllotedTheQuestion.map(team => team.teamName)
+          }
+
+        } )
       }
 
     })
     return res.status(200).json({levelTeamStatus, success: true});
+
+
   }
   catch(error){
     return res.status(500).json({message: "Failed to fetch level team status", error: error.message, success: false});
@@ -375,4 +387,4 @@ const releaseHintsByQuestionId = async (req, res) => {
   }
 }
 
-export { addLevel, addQuestion, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel, releaseHintsByQuestionId };
+export { addLevel, addQuestion, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel, releaseHintsByQuestionId, fetchLevelTeamStatus };
