@@ -8,7 +8,9 @@ import { Badge } from '../components/ui/badge'; // Adjust the path as needed
 import SpaceBackground from '../components/space-background'; // Adjust the path as needed
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { FETCH_CURRENT_QUESTION, SUBMIT_CODE } from '../constants.js';
+import { FETCH_CURRENT_QUESTION, SUBMIT_CODE, FETCH_LEADERBOARD } from '../constants.js';
+import { Trophy } from 'lucide-react';
+
 
 const SET_TIMER_FOR_REFRESHING_QUESTION = 60000;
 
@@ -20,16 +22,46 @@ export default function GamePage() {
   const [error, setError] = useState(null);
   const [answer, setAnswer] = useState('');
   const [loading, setLoading] = useState(true);
+  const [leaderboard,setLeaderboard] = useState([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
 
+  const fetchLeaderboard = async () => {
+    try{
+      setLeaderboardLoading(true);
+      const response = await axios.get(FETCH_LEADERBOARD, {
+        withCredentials: true
+      });
+      setLeaderboard(response.data.leaderboard);
+      setLeaderboardLoading(false);
+    } catch (err) {
+      console.error('Error fetching leaderboard:', err);
+    } finally {
+      setLeaderboardLoading(false);
+    }
+  };
 
 
   useEffect(() => {
+    // Initial fetch of both question and leaderboard
+    const fetchInitialData = async () => {
+        await Promise.all([
+            fetchQuestion(),
+            fetchLeaderboard()
+        ]);
+    };
 
-    fetchQuestion();
-    const interval = setInterval(fetchQuestion, SET_TIMER_FOR_REFRESHING_QUESTION);
+    fetchInitialData();
 
-    return () => clearInterval(interval);
-  }, [])
+    // Set up intervals for both fetches
+    const questionInterval = setInterval(fetchQuestion, SET_TIMER_FOR_REFRESHING_QUESTION);
+    const leaderboardInterval = setInterval(fetchLeaderboard, 60000); // Update leaderboard every minute
+
+    // Cleanup intervals on component unmount
+    return () => {
+        clearInterval(questionInterval);
+        clearInterval(leaderboardInterval);
+    };
+  }, []);
 
   const fetchQuestion = async () => {
     try {
@@ -74,15 +106,6 @@ export default function GamePage() {
     }
   };
 
-  useEffect(() => {
-    fetchQuestion();
-    // Set up an interval to refresh the question every minute
-    const interval = setInterval(fetchQuestion, 60000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <>
       <SpaceBackground />
@@ -94,7 +117,8 @@ export default function GamePage() {
           animate={{ scale: 1, opacity: 1 }}
           className="container mx-auto max-w-4xl"
         >
-          <Card className="backdrop-blur-xl bg-black/30 border-white/10 p-6 space-y-6">
+          {/* Question Card */}
+          <Card className="backdrop-blur-xl bg-black/30 border-white/10 p-6 space-y-6 mb-6">
             {/* Player Info & Timer */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -161,6 +185,56 @@ export default function GamePage() {
                   </form>
                 )}
               </>
+            )}
+          </Card>
+
+          {/* Leaderboard Card */}
+          <Card className="backdrop-blur-xl bg-black/30 border-white/10 p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Trophy className="w-6 h-6 text-yellow-500" />
+              <h2 className="text-xl font-bold text-white">Leaderboard</h2>
+            </div>
+
+            {leaderboardLoading ? (
+              <div className="text-center text-white py-4">Loading leaderboard...</div>
+            ) : (
+              <div className="space-y-4">
+                {leaderboard.map((team, index) => (
+                  <div
+                    key={team._id}
+                    className={`flex items-center justify-between p-3 rounded-lg ${
+                      index === 0 ? 'bg-yellow-500/20' :
+                      index === 1 ? 'bg-gray-400/20' :
+                      index === 2 ? 'bg-orange-700/20' :
+                      'bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`text-lg font-bold ${
+                        index === 0 ? 'text-yellow-500' :
+                        index === 1 ? 'text-gray-400' :
+                        index === 2 ? 'text-orange-700' :
+                        'text-white'
+                      }`}>
+                        #{index + 1}
+                      </span>
+                      <div>
+                        <p className="text-white font-medium">
+                          {team.teamName}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Level {team.level}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-purple-400">
+                        {team.score} pts
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </Card>
         </motion.div>
