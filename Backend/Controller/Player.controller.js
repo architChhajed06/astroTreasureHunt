@@ -203,11 +203,26 @@ const fetchGameDetails = async (req, res) => {
 }
 
 
+const fetchLeaderBoard = async (req, res) => {
+    try{
+
+        const allTeams = await Team.find({}).select("teamName currentLevel currentQuestion score");
+        if(!allTeams){
+            return res.status(404).json({message: "No teams found", success: false});
+        }
+        const teamsSortedByScore = allTeams.sort((a, b) => b.score - a.score).slice(0, 10);
+        return res.status(200).json({message: "Leaderboard", leaderboard: teamsSortedByScore, success: true});
+    }
+    catch(error){
+        return res.status(500).json({message: "Error fetching leaderboard", error: error.message, completeError: error, success: false});
+    }
+}
 
 
 
 
-export {createTeam, getTeamCodeToTeamLeader, joinTeam, getCurrentQuestion, submitQuestionCode, getPlayerLeaderBoard,getTeamDetails, fetchGameDetails};
+
+export {createTeam, getTeamCodeToTeamLeader, joinTeam, getCurrentQuestion, submitQuestionCode, getPlayerLeaderBoard,getTeamDetails, fetchGameDetails, fetchLeaderBoard};
 
 
 

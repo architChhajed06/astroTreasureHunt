@@ -320,10 +320,27 @@ const getQuestionWithHints = async (req, res) => {
 
 const fetchLevelTeamStatus = async (req, res) => {
   try{
-    const allTeams = await Team.find().populate("level currentQuestion");
-    const allLevels = await Level.find();
+    const allTeams = await Team.find().populate("level currentQuestion").groupBy("level");
+    const allLevels = await Level.find().populate("questions");
 
 
+    const levelTeamStatus = allLevels.map( (level) => {
+      level.questions = level.questions.map( (question) => {
+        const allTeamsAllotedTheQuestion = allTeams.filter(team => team.currentQuestion.toString() === question._id.toString());
+        return {
+          questionId: question._id,
+          questionTitle: question.title,
+          allotedTo: allTeamsAllotedTheQuestion.map(team => team.teamName)
+        }
+      })
+
+      return {
+        ...level,
+        questions: levelQuestions
+      }
+
+    })
+    return res.status(200).json({levelTeamStatus, success: true});
   }
   catch(error){
     return res.status(500).json({message: "Failed to fetch level team status", error: error.message, success: false});
