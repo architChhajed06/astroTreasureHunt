@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import SpaceBackground from '../components/space-background';
 import axios from 'axios';
-import { DELETE_QUESTION, GET_ALL_QUESTIONS_BY_LEVEL } from '../constants';
+import { DELETE_QUESTION, GET_ALL_QUESTIONS_BY_LEVEL, RELEASE_HINT } from '../constants';
 
 export default function LevelQuestions() {
     const { levelNum, mongoLevelId } = useParams();
@@ -63,7 +63,11 @@ export default function LevelQuestions() {
                     title: question.title,
                     description: question.description,
                     correctCode: question.correctCode,
-                    hints: question.hints,
+                    hints: question.hints.map(hint => ({
+                        id: hint._id,
+                        text: hint.text,
+                        flag: hint.flag
+                    })),
                     image: question.image
                 }));
                 
@@ -114,6 +118,39 @@ export default function LevelQuestions() {
         }
     };
 
+    const handleReleaseHint = async (questionId, hintId) => {
+        try {
+            const response = await axios.post(RELEASE_HINT(questionId, hintId), {}, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.data.success) {
+                // Update the questions state to reflect the released hint
+                setQuestions(prevQuestions => 
+                    prevQuestions.map(question => {
+                        if (question.id === questionId) {
+                            return {
+                                ...question,
+                                hints: question.hints.map(hint => {
+                                    if (hint.id === hintId) {
+                                        return { ...hint, flag: true };
+                                    }
+                                    return hint;
+                                })
+                            };
+                        }
+                        return question;
+                    })
+                );
+            }
+        } catch (error) {
+            console.error('Error releasing hint:', error);
+            alert('Failed to release hint. Please try again.');
+        }
+    };
 
     return (
         <div className="relative min-h-screen">
@@ -149,7 +186,32 @@ export default function LevelQuestions() {
                                     <h2 className="text-xl font-bold text-white mb-2">{question.title}</h2>
                                     <p className="text-gray-300 mb-4">{question.description}</p>
                                     <div className="text-sm text-gray-400">
-                                        <p>Hints: {question.hints.join(", ")}</p>
+                                        <div className="space-y-2">
+                                            <p className="font-semibold">Hints:</p>
+                                            {question.hints.map((hint, index) => (
+                                                <div 
+                                                    key={hint.id} 
+                                                    className="flex items-center justify-between bg-black/20 p-3 rounded-lg"
+                                                >
+                                                    <div className="flex flex-col">
+                                                        <span className="text-white mb-1">
+                                                            Hint {index + 1}: {hint.text}
+                                                        </span>
+                                                        <span className="text-sm text-gray-400">
+                                                            Status: {hint.flag ? '🟢 Released' : '🔒 Locked'}
+                                                        </span>
+                                                    </div>
+                                                    {!hint.flag && (
+                                                        <button
+                                                            onClick={() => handleReleaseHint(question.id, hint.id)}
+                                                            className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-md text-sm"
+                                                        >
+                                                            Release Hint
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
                                         <p className="mt-2">Correct Code: <span className="font-mono">{question.correctCode}</span></p>
                                     </div>
                                 </div>

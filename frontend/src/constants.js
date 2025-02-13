@@ -14,7 +14,7 @@ export const GET_ALL_LEVELS = `${BASE_URL}/admin/getAllLevels`;
 
 export const GET_ALL_QUESTIONS_BY_LEVEL = (levelId) => `${BASE_URL}/admin/getAllQuestionsByLevel/${levelId}`;
 export const DELETE_LEVEL = (levelId) =>`${BASE_URL}/admin/deleteLevel/${levelId}`;
-
+export const RELEASE_HINT = (questionId,hintId)=>`${BASE_URL}/admin/releaseHintsByQuestionId/${questionId}/${hintId}`;
 
 //Admin Start Game and Reset Game endpoints
 export const START_GAME = `${BASE_URL}/admin/startGame`;
