@@ -147,6 +147,18 @@ const resetGame = async (req, res) => {
             console.log("Setting the variables of team to default values");
             await team.save();
         }        
+
+        //mark all hints as unflagged
+        const allQuestions = await Question.find({});
+        for(const question of allQuestions){
+            question.hints = question.hints.map((hint) => {
+                hint.flag = false;
+                return hint;
+            })
+            await question.save();
+        }
+
+
         console.log("ALL TEAMS SAVED");
         const gameDetails = await GameDetails.findOne({});
         gameDetails.hasGameStarted = false;
@@ -155,10 +167,10 @@ const resetGame = async (req, res) => {
         gameDetails.hasGameFinished = false;
         await gameDetails.save();
         
-        return res.status(200).json({message: "Game reset successfully"});
+        return res.status(200).json({message: "Game reset successfully", success: true});
     }
     catch(error){
-        return res.status(500).json({message: "Error reseting the game", error: error.message, completeError: error});
+        return res.status(500).json({message: "Error reseting the game", error: error.message, completeError: error, success: false});
     }
 }
 

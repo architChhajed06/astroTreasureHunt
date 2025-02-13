@@ -1,6 +1,6 @@
 import express from "express";
 import { auth } from "../Middleware/Token.middleware.js";
-import { createTeam, getTeamCodeToTeamLeader, joinTeam, getCurrentQuestion, submitQuestionCode,getPlayerLeaderBoard,getTeamDetails, fetchGameDetails } from "../Controller/Player.controller.js";
+import { createTeam, getTeamCodeToTeamLeader, joinTeam, getCurrentQuestion, submitQuestionCode,getPlayerLeaderBoard,getTeamDetails, fetchGameDetails, fetchLeaderBoard } from "../Controller/Player.controller.js";
 
 const router = express.Router();
 
@@ -12,4 +12,5 @@ router.post("/submitQuestionCode", auth, submitQuestionCode);
 router.get("/getPlayerLeaderBoard", auth, getPlayerLeaderBoard);
 router.get("/getTeamDetails/:teamId", auth, getTeamDetails);
 router.get("/fetchGameDetails", auth, fetchGameDetails);
+router.get("/fetchLeaderBoard", auth, fetchLeaderBoard);
 export default router;
