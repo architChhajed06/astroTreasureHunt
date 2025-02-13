@@ -303,4 +303,59 @@ const deleteLevel = async (req, res) => {
 };
 
 
-export { addLevel, addQuestion, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel };
+const getQuestionWithHints = async (req, res) => {
+  try{
+    const {questionId} = req.params;
+    const question = await Question.findById(questionId);
+    if(!question){
+      return res.status(404).json({message: "Question not found"});
+    }
+    return res.status(200).json({question, success: true});
+  }
+  catch(error){
+    return res.status(500).json({message: "Failed to get question with hints", error: error.message});
+  }
+}
+
+
+const fetchLevelTeamStatus = async (req, res) => {
+  try{
+    const allTeams = await Team.find().populate("level currentQuestion");
+    const allLevels = await Level.find();
+
+
+  }
+  catch(error){
+    return res.status(500).json({message: "Failed to fetch level team status", error: error.message, success: false});
+  }
+}
+
+
+const releaseHintsByQuestionId = async (req, res) => {
+  try{
+    const {questionId, hintId} = req.params;
+    const question = await Question.findById(questionId);
+
+    console.log("QUESTION: ", question);
+    console.log("HINT ID: ", hintId);
+    if(!question){
+      return res.status(404).json({message: "Question not found", success: false});
+    }
+
+    //check if question exists
+    question.hints = question.hints.map((hint) => {
+      if(hint._id.toString() === hintId){
+        hint.flag = true;
+      }
+      return hint;
+    })
+
+    await question.save();
+    return res.status(200).json({message: "Hints released successfully", success: true});
+  }
+  catch(error){
+    return res.status(500).json({message: "Failed to release hints", error: error.message, success: false});
+  }
+}
+
+export { addLevel, addQuestion, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel, releaseHintsByQuestionId };
