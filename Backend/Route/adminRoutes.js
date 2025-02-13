@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { auth, protectedAdminRoutes } from "../Middleware/Token.middleware.js";
-import { addQuestion, addLevel, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel } from "../Controller/admin.controller.js";
+import { addQuestion, addLevel, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel, releaseHintsByQuestionId } from "../Controller/admin.controller.js";
 import { upload } from "../config/multer.js";
 import { startGame, resetGame } from "../Controller/Game.controller.js";
 const router = express.Router();
@@ -36,6 +36,7 @@ router.post("/modifyQuestion/:questionId", auth, protectedAdminRoutes, modifyQue
 router.delete("/deleteQuestion/:questionId", auth, protectedAdminRoutes, deleteQuestion);
 router.get("/getAllLevels", auth, protectedAdminRoutes, getAllLevels);
 router.get("/getAllQuestionsByLevel/:levelId", auth, protectedAdminRoutes, getAllQuestionsByLevel);
+router.post("/releaseHintsByQuestionId/:questionId/:hintId", auth, protectedAdminRoutes, releaseHintsByQuestionId);
 router.delete("/deleteLevel/:levelId", auth, protectedAdminRoutes, deleteLevel);
 
 router.post("/startGame", auth, protectedAdminRoutes, startGame);
