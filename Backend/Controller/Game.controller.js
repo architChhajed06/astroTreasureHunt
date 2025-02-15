@@ -44,10 +44,20 @@ const startGame = async (req, res) => {
             team.levelStartedAt = new Date();
             await team.save();
         }
-        return res.status(200).json({message: "Game started successfully"});
+        return res.status(200).json({message: "Game started successfully",success:true});
     }
     catch(error){
-        return res.status(500).json({message: "Failed to start the game", error: error.message, completeError: error})
+        return res.status(500).json({message: "Failed to start the game", error: error.message, completeError: error,success:false})
+    }
+}
+
+const fetchGameStatus = async (req, res) => {
+    try{
+        const gameDetails = await GameDetails.findOne({});
+        return res.status(200).json({message: "Game status fetched successfully", gameDetails: gameDetails,success:true});
+    }
+    catch(error){
+        return res.status(500).json({message: "Failed to fetch game status", error: error.message, completeError: error, success: false});
     }
 }
 
@@ -178,5 +188,5 @@ const resetGame = async (req, res) => {
 }
 
 
-export {startGame, allotNewRandomQuestionFromLevel, updateTeamScore, resetGame};
+export {startGame, allotNewRandomQuestionFromLevel, updateTeamScore, resetGame,fetchGameStatus};
 

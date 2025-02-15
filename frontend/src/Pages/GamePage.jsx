@@ -9,11 +9,11 @@ import SpaceBackground from '../components/space-background'; // Adjust the path
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { FETCH_CURRENT_QUESTION, SUBMIT_CODE, FETCH_LEADERBOARD } from '../constants.js';
-import { Trophy } from 'lucide-react';
+import { Trophy,ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-
-const SET_TIMER_FOR_REFRESHING_QUESTION = 60000;
-
+const SET_TIMER_FOR_REFRESHING_QUESTION = 300000;
+const SET_TIMER_FOR_REFRESHING_LEADERBOARD = 600000;
 export default function GamePage() {
   const [hints, setHints] = useState([]);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
@@ -21,20 +21,29 @@ export default function GamePage() {
   const [question, setQuestion] = useState(null);
   const [error, setError] = useState(null);
   const [answer, setAnswer] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [questionloading, setquestionLoading] = useState(true);
+  const [leaderboardloading, setleaderboardloading] = useState(true);
   const [leaderboard,setLeaderboard] = useState([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  const navigate = useNavigate();
+
+
 
   const fetchLeaderboard = async () => {
     try{
+      console.log("Fetching leaderboard");
       setLeaderboardLoading(true);
       const response = await axios.get(FETCH_LEADERBOARD, {
         withCredentials: true
       });
-      setLeaderboard(response.data.leaderboard);
+      if(response.data.success){
+        setLeaderboard(response.data.leaderboard || []);
+        console.log("LEADERBOARD: ", response.data.leaderboard);
+      }
       setLeaderboardLoading(false);
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
+      setLeaderboard([]);
     } finally {
       setLeaderboardLoading(false);
     }
@@ -54,7 +63,7 @@ export default function GamePage() {
 
     // Set up intervals for both fetches
     const questionInterval = setInterval(fetchQuestion, SET_TIMER_FOR_REFRESHING_QUESTION);
-    const leaderboardInterval = setInterval(fetchLeaderboard, 60000); // Update leaderboard every minute
+    const leaderboardInterval = setInterval(fetchLeaderboard, SET_TIMER_FOR_REFRESHING_LEADERBOARD); // Update leaderboard every minute
 
     // Cleanup intervals on component unmount
     return () => {
@@ -65,7 +74,8 @@ export default function GamePage() {
 
   const fetchQuestion = async () => {
     try {
-      setLoading(true);
+      console.log("Fetching question");
+      setquestionLoading(true);
       const response = await axios.get(FETCH_CURRENT_QUESTION, {
         withCredentials: true
       });
@@ -82,7 +92,7 @@ export default function GamePage() {
       console.error('Error fetching question:', err);
       setError(err.response?.data?.message || 'Failed to fetch question');
     } finally {
-      setLoading(false);
+      setquestionLoading(false);
     }
   };
 
@@ -106,6 +116,10 @@ export default function GamePage() {
     }
   };
 
+  const handleBack = () => {
+    navigate('/teamDetails');
+  };
+
   return (
     <>
       <SpaceBackground />
@@ -117,6 +131,15 @@ export default function GamePage() {
           animate={{ scale: 1, opacity: 1 }}
           className="container mx-auto max-w-4xl"
         >
+          {/* Back Button */}
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-2 text-white hover:text-purple-400 transition-colors mb-4 bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm border border-white/10"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Team Details</span>
+          </button>
+
           {/* Question Card */}
           <Card className="backdrop-blur-xl bg-black/30 border-white/10 p-6 space-y-6 mb-6">
             {/* Player Info & Timer */}
@@ -127,13 +150,13 @@ export default function GamePage() {
                   Level {question?.level.level}
                 </Badge>
               </div>
-              <div className="text-2xl font-mono text-white">
+              {/* <div className="text-2xl font-mono text-white">
                 {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}
-              </div>
+              </div> */}
             </div>
 
             {/* Question Area */}
-            {loading ? (
+            {questionloading ? (
               <div className="text-center text-white">Loading question...</div>
             ) : error ? (
               <div className="text-center text-red-400">{error}</div>
@@ -197,11 +220,11 @@ export default function GamePage() {
 
             {leaderboardLoading ? (
               <div className="text-center text-white py-4">Loading leaderboard...</div>
-            ) : (
+            ) : leaderboard && leaderboard.length > 0 ? (
               <div className="space-y-4">
                 {leaderboard.map((team, index) => (
                   <div
-                    key={team._id}
+                    key={team._id || index}
                     className={`flex items-center justify-between p-3 rounded-lg ${
                       index === 0 ? 'bg-yellow-500/20' :
                       index === 1 ? 'bg-gray-400/20' :
@@ -235,6 +258,8 @@ export default function GamePage() {
                   </div>
                 ))}
               </div>
+            ) : (
+              <div className="text-center text-white py-4">No teams found</div>
             )}
           </Card>
         </motion.div>

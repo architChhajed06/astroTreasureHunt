@@ -1,6 +1,5 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useState } from 'react';
 
 // for admin routes only
 export const AdminProtectedRoute = ({ children }) => {
@@ -13,24 +12,40 @@ export const AdminProtectedRoute = ({ children }) => {
 
 export const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
   
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
   if(user.role==='admin'){
     return <Navigate to="/admin" />;
   }
-  // If user has no team and we're not showing the modal yet
-  if (!user.team && window.location.pathname !== '/teamSelection') {
-   return <Navigate to="/teamSelection" />;
-   }
-   // if user is in team and we are not showing team details yet
-   if(user.team && window.location.pathname === '/teamSelection') {
-       return <Navigate to="/teamDetails" />;
-   }
+
+  // Special case for game page - allow refresh
+  if (location.pathname === '/game') {
+    if (user.team) {
+      return children;
+    }
+    return <Navigate to="/teamSelection" />;
+  }
+
+  // For team selection page
+  if (location.pathname === '/teamSelection') {
+    if (user.team) {
+      return <Navigate to="/teamDetails" />;
+    }
+    return children;
+  }
+
+  // For all other protected routes
+  if (!user.team) {
+    return <Navigate to="/teamSelection" />;
+  }
 
   return children;
 };
@@ -41,6 +56,7 @@ export const PublicRoute = ({ children }) => {
   if (loading) {
     return <div>Loading...</div>;
   }
+
   if(user){
     if(user.role==='admin'){
       return <Navigate to="/admin" />;

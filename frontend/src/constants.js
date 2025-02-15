@@ -19,7 +19,13 @@ export const RELEASE_HINT = (questionId,hintId)=>`${BASE_URL}/admin/releaseHints
 //Admin Start Game and Reset Game endpoints
 export const START_GAME = `${BASE_URL}/admin/startGame`;
 export const RESET_GAME = `${BASE_URL}/admin/resetGame`;
-
+// Admin Level Stats
+export const FETCH_LEVEL_STATS = `${BASE_URL}/admin/level-stats`;
+export const FETCH_LEVEL_QUESTION_STATS = (levelId) => `${BASE_URL}/admin/level/${levelId}/questions`;
+export const FETCH_GAME_STATUS = `${BASE_URL}/admin/fetchGameStatus`;
+export const BLOCK_TEAM = (teamId) => `${BASE_URL}/admin/blockTeam/${teamId}`;
+export const UNBLOCK_TEAM = (teamId) => `${BASE_URL}/admin/unblockTeam/${teamId}`;
+export const FETCH_ALL_TEAMS = `${BASE_URL}/admin/fetchAllTeams`;
 
 // Join team and create team
 export const JOIN_TEAM = `${BASE_URL}/player/joinTeam`;
@@ -39,3 +45,4 @@ export const FETCH_CURRENT_QUESTION = `${BASE_URL}/player/getCurrentQuestion`
 export const GET_GAME_DETAILS = `${BASE_URL}/player/fetchGameDetails`;
 export const SUBMIT_CODE = `${BASE_URL}/player/submitQuestionCode`;
 export const FETCH_LEADERBOARD = `${BASE_URL}/player/fetchLeaderBoard`;
+

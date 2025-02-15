@@ -387,4 +387,138 @@ const releaseHintsByQuestionId = async (req, res) => {
   }
 }
 
-export { addLevel, addQuestion, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel, releaseHintsByQuestionId, fetchLevelTeamStatus };
+const fetchLevelStats = async (req, res) => {
+  try {
+    const gameDetails = await GameDetails.findOne({});
+    if (!gameDetails || gameDetails.hasGameStarted === false) {
+      return res.status(400).json({ message: "Game has not started yet", success: false });
+    }
+
+    // Fetch teams with populated currentLevel
+    const allTeams = await Team.find().populate('currentLevel');
+    
+    // Fetch all levels
+    const allLevels = await Level.find().sort({ level: 1 }); // Sort by level number
+
+    const levelStats = allLevels.map(level => {
+      // Get teams in this level
+      const teamsInLevel = allTeams.filter(team => 
+        team.currentLevel && team.currentLevel._id.toString() === level._id.toString()
+      );
+
+      return {
+        levelId: level._id,
+        levelNumber: level.level,
+        totalTeams: teamsInLevel.length,
+        teamNames: teamsInLevel.map(team => ({
+          teamName: team.teamName,
+          teamId: team._id
+        })),
+        totalQuestions: level.questions ? level.questions.length : 0
+      };
+    });
+
+    return res.status(200).json({ levelStats, success: true });
+
+  } catch (error) {
+    console.error('Error in fetchLevelStats:', error);
+    return res.status(500).json({
+      message: "Failed to fetch level statistics", 
+      error: error.message, 
+      success: false
+    });
+  }
+};
+
+const fetchLevelQuestionStats = async (req, res) => {
+  try {
+    const { levelId } = req.params;
+
+    const level = await Level.findById(levelId).populate('questions');
+    if (!level) {
+      return res.status(404).json({ message: "Level not found", success: false });
+    }
+
+    const allTeams = await Team.find().populate('currentQuestion currentLevel');
+
+    const questionStats = level.questions.map(question => {
+      // Get teams currently on this question
+      const teamsOnQuestion = allTeams.filter(team => 
+        team.currentLevel && 
+        team.currentQuestion &&
+        team.currentLevel._id.toString() === levelId &&
+        team.currentQuestion._id.toString() === question._id.toString()
+      );
+
+      return {
+        questionId: question._id,
+        title: question.title,
+        currentlyAttempting: teamsOnQuestion.length,
+        attemptingTeams: teamsOnQuestion.map(team => ({
+          teamName: team.teamName,
+          teamId: team._id
+        }))
+      };
+    });
+
+    return res.status(200).json({
+      levelNumber: level.level,
+      questionStats,
+      success: true
+    });
+
+  } catch (error) {
+    console.error('Error in fetchLevelQuestionStats:', error);
+    return res.status(500).json({
+      message: "Failed to fetch level question statistics", 
+      error: error.message, 
+      success: false
+    });
+  }
+};
+
+
+const blockTeam = async (req, res) => {
+  try{
+    const {teamId} = req.params;
+    const team = await Team.findById(teamId);
+    if(!team){
+      return res.status(404).json({message: "Team not found", success: false});
+    }
+    team.blocked = true;
+    await team.save();
+    return res.status(200).json({message: "Team blocked successfully", success: true});
+  }
+  catch(error){
+    return res.status(500).json({message: "Failed to block team", error: error.message, success: false});
+  }
+}
+
+const unblockTeam = async (req, res) => {
+  try{
+    const {teamId} = req.params;
+    const team = await Team.findById(teamId);
+    if(!team){
+      return res.status(404).json({message: "Team not found", success: false});
+    }
+    team.blocked = false;
+    await team.save();
+    return res.status(200).json({message: "Team blocked successfully", success: true});
+  }
+  catch(error){
+    return res.status(500).json({message: "Failed to unblock team", error: error.message, success: false});
+  }
+}
+
+const fetchAllTeams = async (req, res) => {
+  try{
+    const allTeams = await Team.find();
+    return res.status(200).json({allTeams, success: true});
+  }
+  catch(error){
+    return res.status(500).json({message: "Failed to fetch all teams", error: error.message, success: false});
+  }
+}
+
+
+export { addLevel, addQuestion, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel, releaseHintsByQuestionId, fetchLevelTeamStatus, fetchLevelStats, fetchLevelQuestionStats, blockTeam, unblockTeam, fetchAllTeams };

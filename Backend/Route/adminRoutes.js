@@ -1,9 +1,9 @@
 import express from "express";
 import multer from "multer";
 import { auth, protectedAdminRoutes } from "../Middleware/Token.middleware.js";
-import { addQuestion, addLevel, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel, releaseHintsByQuestionId, fetchLevelTeamStatus } from "../Controller/admin.controller.js";
+import { addQuestion, addLevel, modifyQuestion, deleteQuestion, getAllLevels, getAllQuestionsByLevel, deleteLevel, releaseHintsByQuestionId, fetchLevelTeamStatus, fetchLevelStats, fetchLevelQuestionStats, blockTeam, unblockTeam, fetchAllTeams } from "../Controller/admin.controller.js";
 import { upload } from "../config/multer.js";
-import { startGame, resetGame } from "../Controller/Game.controller.js";
+import { startGame, resetGame, fetchGameStatus } from "../Controller/Game.controller.js";
 const router = express.Router();
 
 // Use upload.single('image') middleware for image upload
@@ -42,7 +42,12 @@ router.delete("/deleteLevel/:levelId", auth, protectedAdminRoutes, deleteLevel);
 
 router.post("/startGame", auth, protectedAdminRoutes, startGame);
 router.post("/resetGame", auth, protectedAdminRoutes, resetGame);
+router.post("/blockTeam/:teamId", auth, protectedAdminRoutes, blockTeam);
+router.post("/unblockTeam/:teamId", auth, protectedAdminRoutes, unblockTeam);
+router.get("/fetchGameStatus", auth, protectedAdminRoutes, fetchGameStatus);
 
-
+router.get('/level-stats', fetchLevelStats);
+router.get('/level/:levelId/questions', fetchLevelQuestionStats);
+router.get("/fetchAllTeams", auth, protectedAdminRoutes, fetchAllTeams);
 
 export default router;
