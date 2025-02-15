@@ -5,8 +5,9 @@ import Levels from "./LevelPage";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { LevelStats } from "./AdminDashboard/LevelStats";
+import Teams from "./AdminDashboard/Teams";
 import axios from "axios";
-import { START_GAME, RESET_GAME, FETCH_GAME_STATUS } from "../constants";
+import { START_GAME, RESET_GAME, FETCH_GAME_STATUS, FINISH_GAME } from "../constants";
 
 const AdminPage = () => {
   const { logout } = useAuth();
@@ -72,7 +73,25 @@ const AdminPage = () => {
       }
     }
   };
-
+  const handleFinishGame = async()=>{
+    if(window.confirm("Are you sure you want to finish the game? This will end the game for all teams.")){
+      try{
+        setLoading(true);
+        const response = await axios.post(FINISH_GAME, {}, {withCredentials: true});
+        if(response.data.success){
+          setGameStatus(false);
+          alert("Game finished successfully!");
+        }
+      }
+      catch(error){
+        console.error("Error finishing game:", error);
+        alert("Failed to finish game");
+      }
+      finally{
+        setLoading(false);
+      }
+    }
+  };
   return (
     <div className="relative min-h-screen">
       <div className="absolute inset-0">
@@ -80,26 +99,33 @@ const AdminPage = () => {
       </div>
       
       <div className="container mx-auto px-4 py-8 relative">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
           <h1 className="text-4xl font-bold text-white">Admin Dashboard</h1>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap justify-center items-center gap-4">
             <Button
               onClick={handleStartGame}
               disabled={loading || gameStatus}
-              className="bg-green-600 hover:bg-green-700 text-white px-6"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 w-full sm:w-auto"
             >
               {loading ? 'Processing...' : gameStatus ? 'Game Running' : 'Start Game'}
             </Button>
             <Button
               onClick={handleResetGame}
               disabled={loading || !gameStatus}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 w-full sm:w-auto"
             >
               {loading ? 'Processing...' : 'Reset Game'}
             </Button>
             <Button
+              onClick={handleFinishGame}
+              disabled={loading || !gameStatus}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 w-full sm:w-auto"
+            >
+              {loading ? 'Processing...' : 'Finish Game'}
+            </Button>
+            <Button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-6"
+              className="bg-red-600 hover:bg-red-700 text-white px-6 w-full sm:w-auto"
             >
               Logout
             </Button>
@@ -128,15 +154,30 @@ const AdminPage = () => {
             >
               Level Statistics
             </button>
+            <button
+              onClick={() => setActiveTab('teams')}
+              className={`px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'teams'
+                  ? 'bg-purple-500/20 text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Teams
+            </button>
           </div>
         </div>
 
         <div className="mt-6">
           {activeTab === 'levels' ? (
             <Levels />
-          ) : (
+          ) : activeTab === 'stats' ? (
             <LevelStats />
-          )}
+          ) : activeTab === 'teams' ? (
+            <Teams />
+          ) : null
+          
+          
+          }
         </div>
       </div>
     </div>

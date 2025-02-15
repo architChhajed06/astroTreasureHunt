@@ -19,6 +19,7 @@ export const RELEASE_HINT = (questionId,hintId)=>`${BASE_URL}/admin/releaseHints
 //Admin Start Game and Reset Game endpoints
 export const START_GAME = `${BASE_URL}/admin/startGame`;
 export const RESET_GAME = `${BASE_URL}/admin/resetGame`;
+export const FINISH_GAME = `${BASE_URL}/admin/finishGame`;
 // Admin Level Stats
 export const FETCH_LEVEL_STATS = `${BASE_URL}/admin/level-stats`;
 export const FETCH_LEVEL_QUESTION_STATS = (levelId) => `${BASE_URL}/admin/level/${levelId}/questions`;

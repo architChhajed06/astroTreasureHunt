@@ -453,6 +453,8 @@ const fetchLevelQuestionStats = async (req, res) => {
       return {
         questionId: question._id,
         title: question.title,
+        hints: question.hints,
+        correctCode: question.correctCode,
         currentlyAttempting: teamsOnQuestion.length,
         attemptingTeams: teamsOnQuestion.map(team => ({
           teamName: team.teamName,
@@ -481,6 +483,7 @@ const fetchLevelQuestionStats = async (req, res) => {
 const blockTeam = async (req, res) => {
   try{
     const {teamId} = req.params;
+    console.log("BLOCKING TEAM: ", teamId);
     const team = await Team.findById(teamId);
     if(!team){
       return res.status(404).json({message: "Team not found", success: false});
@@ -512,7 +515,7 @@ const unblockTeam = async (req, res) => {
 
 const fetchAllTeams = async (req, res) => {
   try{
-    const allTeams = await Team.find();
+    const allTeams = await Team.find().populate('currentLevel teamLead members');
     return res.status(200).json({allTeams, success: true});
   }
   catch(error){

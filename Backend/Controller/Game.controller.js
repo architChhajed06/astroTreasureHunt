@@ -187,6 +187,19 @@ const resetGame = async (req, res) => {
     }
 }
 
+const finishGame =async(req,res)=>{
+    try{
+        const gameDetails = await GameDetails.findOne({});
+        gameDetails.hasGameFinished = true;
+        gameDetails.gameEndTime = new Date();
+        await gameDetails.save();
+        return res.status(200).json({message: "Game finished successfully", success: true});
+    }
+    catch(error){
+        return res.status(500).json({message: "Error finishing the game", error: error.message, completeError: error, success: false});
+    }
+}
 
-export {startGame, allotNewRandomQuestionFromLevel, updateTeamScore, resetGame,fetchGameStatus};
+
+export {startGame, allotNewRandomQuestionFromLevel, updateTeamScore, resetGame,fetchGameStatus,finishGame};
 
